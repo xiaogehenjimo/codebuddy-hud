@@ -145,6 +145,7 @@ test('status command renders fixture JSON', () => {
   assert.match(stdout, /CodeBuddy/);
   assert.match(stdout, /91\.7K\/1M/);
   assert.match(stdout, /缓存 5\.8M/);
+  assert.match(stdout, /变更 \+168 -1/);
   assert.doesNotMatch(stdout, /积分/);
 });
 

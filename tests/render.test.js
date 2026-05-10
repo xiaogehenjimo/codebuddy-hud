@@ -42,6 +42,7 @@ test('renders multiline HUD without credits by default', () => {
   assert.match(output, /CodeBuddy/);
   assert.match(output, /91\.7K\/1M/);
   assert.match(output, /cache 5\.8M/);
+  assert.match(output, /Changes \+1 -2/);
   assert.doesNotMatch(output, /credits/);
   assert.equal(output.split('\n').length, 4);
 });
@@ -65,6 +66,8 @@ test('renders Chinese HUD labels when language is zh', () => {
   assert.match(output, /词元/);
   assert.doesNotMatch(output, /令牌/);
   assert.match(output, /缓存 5\.8M/);
+  assert.match(output, /变更 \+1 -2/);
+  assert.doesNotMatch(output, /Δ/);
   assert.match(output, /工具 空闲/);
   assert.match(output, /任务/);
 });

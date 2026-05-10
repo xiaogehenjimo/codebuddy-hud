@@ -284,7 +284,8 @@ function render(status, config, transcriptSummary = {}) {
     const contextLine = joinParts(safeConfig, [
       `${label(safeConfig, t('hud.ctx'), 'brightMagenta')} ${contextBar} ${color(safeConfig, ['bold', ctxColor], formatPercent(ctx.pct))}`,
       stat(safeConfig, t('hud.tok'), tokens, 'cyan'),
-      display.showCache && ctx.cache ? stat(safeConfig, t('hud.cache'), formatTokens(ctx.cache), 'blue') : null
+      display.showCache && ctx.cache ? stat(safeConfig, t('hud.cache'), formatTokens(ctx.cache), 'blue') : null,
+      display.showLinesChanged ? stat(safeConfig, t('hud.changes'), `+${num(cost.total_lines_added) || 0} -${num(cost.total_lines_removed) || 0}`, 'magenta') : null
     ]);
     parts.push(contextLine);
   }
@@ -298,9 +299,6 @@ function render(status, config, transcriptSummary = {}) {
     }
     if (credits) {
       statParts.push(quotaSegment(safeConfig, t, credits));
-    }
-    if (display.showLinesChanged) {
-      statParts.push(stat(safeConfig, 'Δ', `+${num(cost.total_lines_added) || 0} -${num(cost.total_lines_removed) || 0}`, 'magenta'));
     }
     if (display.showCost && Number.isFinite(num(cost.total_cost_usd))) {
       statParts.push(stat(safeConfig, '$', Number(cost.total_cost_usd).toFixed(4), 'brightYellow'));
