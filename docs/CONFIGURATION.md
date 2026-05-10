@@ -77,6 +77,9 @@ If official fields are absent, HUD can read an explicit quota snapshot:
 
 ```bash
 node bin/codebuddy-hud.js configure set credits.snapshotPath ~/.codebuddy/quota.json
+node bin/codebuddy-hud.js configure set credits.refreshCommand 'your trusted command that writes ~/.codebuddy/quota.json'
+node bin/codebuddy-hud.js quota refresh
+node bin/codebuddy-hud.js quota status
 node bin/codebuddy-hud.js configure set credits.maxStalenessMs 3600000
 node bin/codebuddy-hud.js configure set credits.warningRemainingPercent 25
 node bin/codebuddy-hud.js configure set credits.dangerRemainingPercent 10
@@ -104,7 +107,7 @@ Source priority:
 official statusLine fields > quota snapshot > local transcript estimate
 ```
 
-`refreshCommand` is stored as configuration only in the current version; it is not executed during `status` rendering. HUD does not read credentials or call undocumented APIs by default.
+`refreshCommand` is never executed during `status` rendering. It only runs when you explicitly call `quota refresh`. HUD does not read credentials or call undocumented APIs by default.
 
 ## Presets
 

@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 const fs = require('fs');
+const { spawnSync } = require('child_process');
 const { defaultConfig, loadConfig, ensureConfig, setupStatusLine, uninstallStatusLine, paths, writeJson } = require('./config');
 const { createTranslator } = require('./i18n');
 const { render } = require('./render');
+const { readSnapshotQuota } = require('./quota');
 const { summarizeTranscript } = require('./transcript');
 
 function readStdin() {
@@ -82,6 +84,57 @@ function commandConfigPath() {
   process.stdout.write(`${paths.configPath}\n`);
 }
 
+function formatQuotaSummary(t, quota) {
+  const parts = [`${quota.remaining}/${quota.total}`];
+  if (quota.used !== undefined) parts.push(`${t('hud.used')} ${quota.used}`);
+  if (quota.plan) parts.push(String(quota.plan));
+  if (quota.source) parts.push(t(`hud.source.${quota.source}`));
+  if (quota.stale) parts.push(t('hud.stale'));
+  return parts.join(' · ');
+}
+
+function commandQuota(args) {
+  const config = loadConfig();
+  const t = createTranslator(config);
+  const action = args[0] || 'status';
+
+  if (action === 'status') {
+    const quota = readSnapshotQuota(config);
+    if (!quota) {
+      process.stdout.write(`${t('cli.noQuotaSnapshot')}\n`);
+      return;
+    }
+    process.stdout.write(`${t('cli.quotaStatus')}: ${formatQuotaSummary(t, quota)}\n`);
+    return;
+  }
+
+  if (action === 'refresh') {
+    const refreshCommand = config.credits && config.credits.refreshCommand;
+    if (!refreshCommand) throw new Error(t('error.refreshCommandMissing'));
+
+    process.stdout.write(`${t('cli.runningRefreshCommand')}\n`);
+    const result = spawnSync(refreshCommand, {
+      shell: true,
+      stdio: 'inherit',
+      env: process.env
+    });
+
+    if (result.error) throw result.error;
+    if (result.status !== 0) process.exit(result.status || 1);
+
+    if (config.credits && config.credits.snapshotPath) {
+      const quota = readSnapshotQuota(config);
+      if (!quota) throw new Error(t('error.snapshotInvalid', { path: config.credits.snapshotPath }));
+      process.stdout.write(`${t('cli.quotaRefreshed')}: ${formatQuotaSummary(t, quota)}\n`);
+    } else {
+      process.stdout.write(`${t('cli.quotaRefreshed')}\n`);
+    }
+    return;
+  }
+
+  throw new Error(t('error.unknownQuotaAction', { action }));
+}
+
 function parseConfigValue(raw) {
   if (raw === undefined) return undefined;
   if (raw === 'true') return true;
@@ -114,7 +167,7 @@ function setConfigValue(config, keyPath, value, t = createTranslator(config)) {
 }
 
 function printConfigureHelp(t) {
-  process.stdout.write(`${t('cli.configTitle')}\n\n${t('cli.configFile')}\n  ${paths.configPath}\n\n${t('cli.usage')}\n  codebuddy-hud.js configure list\n  codebuddy-hud.js configure get <path>\n  codebuddy-hud.js configure set <path> <value>\n  codebuddy-hud.js configure toggle <path>\n  codebuddy-hud.js configure preset <default|minimal|full>\n  codebuddy-hud.js configure reset\n\n${t('cli.examples')}\n  codebuddy-hud.js configure set language en\n  codebuddy-hud.js configure set credits.enabled true\n  codebuddy-hud.js configure set credits.totalCredits 500\n  codebuddy-hud.js configure set credits.usedCreditsOffset 100\n  codebuddy-hud.js configure set credits.snapshotPath ~/.codebuddy/quota.json\n  codebuddy-hud.js configure set credits.warningRemainingPercent 25\n  codebuddy-hud.js configure toggle display.showCredits\n  codebuddy-hud.js configure set barWidth 20\n  codebuddy-hud.js configure set colors.enabled false\n  codebuddy-hud.js configure preset full\n`);
+  process.stdout.write(`${t('cli.configTitle')}\n\n${t('cli.configFile')}\n  ${paths.configPath}\n\n${t('cli.usage')}\n  codebuddy-hud.js configure list\n  codebuddy-hud.js configure get <path>\n  codebuddy-hud.js configure set <path> <value>\n  codebuddy-hud.js configure toggle <path>\n  codebuddy-hud.js configure preset <default|minimal|full>\n  codebuddy-hud.js configure reset\n  codebuddy-hud.js quota refresh\n  codebuddy-hud.js quota status\n\n${t('cli.examples')}\n  codebuddy-hud.js configure set language en\n  codebuddy-hud.js configure set credits.enabled true\n  codebuddy-hud.js configure set credits.totalCredits 500\n  codebuddy-hud.js configure set credits.usedCreditsOffset 100\n  codebuddy-hud.js configure set credits.snapshotPath ~/.codebuddy/quota.json\n  codebuddy-hud.js configure set credits.refreshCommand 'your trusted refresh command'\n  codebuddy-hud.js configure set credits.warningRemainingPercent 25\n  codebuddy-hud.js configure toggle display.showCredits\n  codebuddy-hud.js configure set barWidth 20\n  codebuddy-hud.js configure set colors.enabled false\n  codebuddy-hud.js configure preset full\n`);
 }
 
 function presetConfig(name) {
@@ -212,6 +265,7 @@ try {
   else if (command === 'setup') commandSetup();
   else if (command === 'uninstall') commandUninstall();
   else if (command === 'config-path') commandConfigPath();
+  else if (command === 'quota') commandQuota(process.argv.slice(3));
   else if (command === 'configure' || command === 'config') commandConfigure(process.argv.slice(3));
   else {
     process.stderr.write(`${createTranslator(loadConfig())('error.usage')}\n`);

@@ -138,6 +138,9 @@ If official fields are missing, HUD can read an explicit local quota snapshot fi
 ```bash
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.snapshotPath ~/.codebuddy/quota.json
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.maxStalenessMs 3600000
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.refreshCommand 'your trusted command that writes ~/.codebuddy/quota.json'
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js quota refresh
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js quota status
 ```
 
 Snapshot example:
@@ -155,7 +158,7 @@ Snapshot example:
 }
 ```
 
-If both official fields and snapshot are missing, it falls back to the local transcript estimate. The local estimate is not an official account balance and may miss usage from other machines, projects, or cleaned transcripts. HUD never reads credentials or calls undocumented APIs during `status` rendering.
+If both official fields and snapshot are missing, it falls back to the local transcript estimate. The local estimate is not an official account balance and may miss usage from other machines, projects, or cleaned transcripts. HUD never reads credentials or calls undocumented APIs during `status` rendering. `refreshCommand` is only executed by the explicit `quota refresh` command.
 
 Important display flags:
 

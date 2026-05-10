@@ -170,9 +170,15 @@ function resolveQuota(status, config, transcriptSummary) {
   return extractOfficialQuota(status) || readSnapshotQuota(config || {}) || estimateLocalQuota(config || {}, transcriptSummary || {});
 }
 
+function validateSnapshotQuota(config) {
+  const quota = readSnapshotQuota(config || {});
+  return quota ? { ok: true, quota } : { ok: false };
+}
+
 module.exports = {
   extractOfficialQuota,
   readSnapshotQuota,
+  validateSnapshotQuota,
   estimateLocalQuota,
   resolveQuota,
   normalizeQuota,

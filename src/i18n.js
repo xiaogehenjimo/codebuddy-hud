@@ -40,7 +40,11 @@ const dictionaries = {
       paths: 'paths:',
       set: 'Set',
       appliedPreset: 'Applied {name} preset',
-      resetConfig: 'Reset HUD config to defaults'
+      resetConfig: 'Reset HUD config to defaults',
+      runningRefreshCommand: 'Running quota refresh command...',
+      quotaRefreshed: 'quota refreshed',
+      quotaStatus: 'quota status',
+      noQuotaSnapshot: 'no valid quota snapshot'
     },
     error: {
       missingConfigPath: 'missing config path',
@@ -50,7 +54,10 @@ const dictionaries = {
       notBoolean: '{path} is not a boolean',
       presetRequiresName: 'configure preset requires default, minimal, or full',
       unknownConfigureAction: 'unknown configure action: {action}',
-      usage: 'Usage: codebuddy-hud.js <status|inspect|setup|uninstall|config-path|configure>'
+      refreshCommandMissing: 'credits.refreshCommand is not configured',
+      snapshotInvalid: 'quota snapshot is missing or invalid: {path}',
+      unknownQuotaAction: 'unknown quota action: {action}',
+      usage: 'Usage: codebuddy-hud.js <status|inspect|setup|uninstall|config-path|configure|quota>'
     }
   },
   zh: {
@@ -94,7 +101,11 @@ const dictionaries = {
       paths: '字段路径：',
       set: '已设置',
       appliedPreset: '已应用 {name} 预设',
-      resetConfig: '已重置 HUD 配置为默认值'
+      resetConfig: '已重置 HUD 配置为默认值',
+      runningRefreshCommand: '正在执行配额刷新命令...',
+      quotaRefreshed: '配额已刷新',
+      quotaStatus: '配额状态',
+      noQuotaSnapshot: '没有有效的配额快照'
     },
     error: {
       missingConfigPath: '缺少配置路径',
@@ -104,7 +115,10 @@ const dictionaries = {
       notBoolean: '{path} 不是布尔值',
       presetRequiresName: 'configure preset 需要 default、minimal 或 full',
       unknownConfigureAction: '未知 configure 操作：{action}',
-      usage: '用法：codebuddy-hud.js <status|inspect|setup|uninstall|config-path|configure>'
+      refreshCommandMissing: '未配置 credits.refreshCommand',
+      snapshotInvalid: '配额快照不存在或无效：{path}',
+      unknownQuotaAction: '未知 quota 操作：{action}',
+      usage: '用法：codebuddy-hud.js <status|inspect|setup|uninstall|config-path|configure|quota>'
     }
   }
 };

@@ -154,6 +154,9 @@ node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credi
 ```bash
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.snapshotPath ~/.codebuddy/quota.json
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.maxStalenessMs 3600000
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.refreshCommand '你信任的、会写入 ~/.codebuddy/quota.json 的命令'
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js quota refresh
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js quota status
 ```
 
 快照示例：
@@ -171,7 +174,7 @@ node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credi
 }
 ```
 
-如果官方字段和快照都不存在，则回退到本地 transcript 估算。本地估算不是官方账号余额。其它机器、其它项目或已清理 transcript 的消耗可能无法统计。HUD 在 `status` 渲染期间不会读取凭据，也不会调用未文档化的 API。
+如果官方字段和快照都不存在，则回退到本地 transcript 估算。本地估算不是官方账号余额。其它机器、其它项目或已清理 transcript 的消耗可能无法统计。HUD 在 `status` 渲染期间不会读取凭据，也不会调用未文档化的 API。`refreshCommand` 只会在你显式执行 `quota refresh` 时运行。
 
 `language` 只影响 HUD 标签和命令行提示，不会翻译模型名、分支名、工具名或 token 单位。
 

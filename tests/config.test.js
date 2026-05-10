@@ -79,6 +79,46 @@ test('configure get/set/toggle works with isolated config', () => {
   assert.equal(result.stdout.trim(), '"/tmp/quota.json"');
 });
 
+test('quota status and refresh use explicit configured command', () => {
+  const { dir, env } = tempEnv();
+  const snapshotPath = path.join(dir, 'quota.json');
+
+  let result = run(['quota', 'refresh'], { env });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /refreshCommand|未配置/);
+
+  result = run(['quota', 'status'], { env });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /没有有效的配额快照|no valid quota snapshot/);
+
+  const refreshScript = `require('fs').writeFileSync(${JSON.stringify(snapshotPath)}, JSON.stringify({quota:{remaining:9,total:10,used:1,plan:'Pro',updatedAt:new Date().toISOString()}}))`;
+  result = run(['configure', 'set', 'credits.snapshotPath', snapshotPath], { env });
+  assert.equal(result.status, 0, result.stderr);
+  result = run(['configure', 'set', 'credits.refreshCommand', `${process.execPath} -e ${JSON.stringify(refreshScript)}`], { env });
+  assert.equal(result.status, 0, result.stderr);
+
+  result = run(['quota', 'refresh'], { env });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /9\/10/);
+
+  result = run(['quota', 'status'], { env });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /9\/10/);
+});
+
+test('status command does not execute refreshCommand', () => {
+  const { dir, env } = tempEnv();
+  const markerPath = path.join(dir, 'marker');
+  const refreshScript = `require('fs').writeFileSync(${JSON.stringify(markerPath)}, 'ran')`;
+
+  let result = run(['configure', 'set', 'credits.refreshCommand', `${process.execPath} -e ${JSON.stringify(refreshScript)}`], { env });
+  assert.equal(result.status, 0, result.stderr);
+
+  result = run(['status'], { env, input: '{"model":{"display_name":"GPT-5.5"}}' });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(fs.existsSync(markerPath), false);
+});
+
 test('setup and uninstall preserve previous statusLine', () => {
   const { dir, env } = tempEnv();
   const settingsPath = path.join(dir, 'settings.json');
