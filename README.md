@@ -4,6 +4,9 @@
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 [![StatusLine](https://img.shields.io/badge/CodeBuddy-statusLine-purple)](https://github.com/xiaogehenjimo/codebuddy-hud)
 
+[![English](https://img.shields.io/badge/lang-English-blue)](README.md)
+[![简体中文](https://img.shields.io/badge/lang-简体中文-red)](README.zh-CN.md)
+
 A multi-line terminal HUD for CodeBuddy Code, inspired by the focused terminal experience of `claude-hud`.
 
 CodeBuddy HUD runs as a native CodeBuddy `statusLine` command. It reads the JSON payload CodeBuddy sends on stdin, parses the session transcript when available, and renders a compact dashboard directly in your terminal.
