@@ -13,9 +13,8 @@ CodeBuddy HUD runs as a native CodeBuddy `statusLine` command. It reads the JSON
 
 ```text
 CodeBuddy · GPT-5.5 · live-iOS · git release/3.43.0 *
-ctx █░░░░░░░░░░░░░░░ 9.2% · tok 91.7K/1M · cache 5.8M
-tok in 715.9K · out 22.9K · time 12m49s · api 10m0s · Δ +168 -1
-act tools Read×2 Bash×1 Glob×1 Grep×1 · agents 0 · tasks ████████ 1/1
+ctx █░░░░░░░░░░░░░░░ 9.2% · tok 91.7K/1M · cache 5.8M · Changes +168 -1
+tok in 715.9K · out 22.9K · tools Read×2 Bash×1 Glob×1 Grep×1 · agents 0 · tasks ████████ 1/1
 ```
 
 ## What it shows
@@ -27,11 +26,10 @@ act tools Read×2 Bash×1 Glob×1 Grep×1 · agents 0 · tasks █████�
 | Context health | `context_window.*` | `91.7K/1M · 9.2%` |
 | Cache tokens | `current_usage.cache_*` | `cache 5.8M` |
 | Token totals | `total_input_tokens`, `total_output_tokens` | `in 715.9K · out 22.9K` |
-| Duration | `cost.total_duration_ms` | `time 12m49s` |
-| Code changes | `cost.total_lines_*` | `Δ +168 -1` |
-| Tool activity | Transcript JSONL | `Read×2 Bash×1` |
+| Code changes | `cost.total_lines_*` | `Changes +168 -1` |
+| Tool activity | Transcript JSONL | `tools Read×2 Bash×1` |
 | Agents and tasks | Transcript JSONL | `agents 1 · tasks 2/5` |
-| Credits | Transcript JSONL | Hidden by default, configurable |
+| Credits/quota | Official fields, snapshot, or transcript estimate | Hidden by default, configurable |
 
 ## Requirements
 
@@ -120,9 +118,10 @@ Language:
 
 `language` only changes HUD labels and command output. It does not translate model names, branch names, tool names, or token units.
 
-Estimated credits:
+Estimated credits/quota are hidden by default. Enable the display flag first, then configure a source:
 
 ```bash
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set display.showCredits true
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.enabled true
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.totalCredits 500
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.usedCreditsOffset 0
@@ -171,10 +170,10 @@ Important display flags:
 | `display.showTokens` | `true` | Input/output token totals |
 | `display.showCache` | `true` | Prompt/cache token segment |
 | `display.showCost` | `false` | USD cost from CodeBuddy when available |
-| `display.showCredits` | `false` | Credit totals parsed from transcript |
-| `display.showTools` | `true` | Tool call counts from transcript |
-| `display.showAgents` | `true` | Agent call count |
-| `display.showTasks` | `true` | Task progress |
+| `display.showCredits` | `false` | Credit/quota segment from official fields, snapshot, or transcript estimate |
+| `display.showTools` | `true` | Tool call counts from transcript, rendered on the token totals line |
+| `display.showAgents` | `true` | Agent call count, rendered on the token totals line |
+| `display.showTasks` | `true` | Task progress, rendered on the token totals line |
 | `colors.enabled` | `true` | ANSI color output |
 
 ## Context thresholds

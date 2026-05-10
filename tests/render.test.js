@@ -44,7 +44,10 @@ test('renders multiline HUD without credits by default', () => {
   assert.match(output, /cache 5\.8M/);
   assert.match(output, /Changes \+1 -2/);
   assert.doesNotMatch(output, /credits/);
-  assert.equal(output.split('\n').length, 4);
+  assert.match(output.split('\n')[2], /tools Read×1/);
+  assert.match(output.split('\n')[2], /agents 0/);
+  assert.match(output.split('\n')[2], /tasks/);
+  assert.equal(output.split('\n').length, 3);
 });
 
 test('renders Chinese HUD labels when language is zh', () => {
@@ -68,8 +71,9 @@ test('renders Chinese HUD labels when language is zh', () => {
   assert.match(output, /缓存 5\.8M/);
   assert.match(output, /变更 \+1 -2/);
   assert.doesNotMatch(output, /Δ/);
-  assert.match(output, /工具 空闲/);
-  assert.match(output, /任务/);
+  assert.match(output.split('\n')[2], /工具 空闲/);
+  assert.match(output.split('\n')[2], /代理 0/);
+  assert.match(output.split('\n')[2], /任务/);
 });
 
 test('estimates remaining credits from transcript total and offset', () => {
@@ -127,7 +131,7 @@ test('renders official credits even when local credits are disabled', () => {
     cost: {},
     context_window: {},
     billing: { remainingCredits: 88, totalCredits: 100 }
-  }, { ...defaultConfig, language: 'en', colors: { enabled: false }, credits: { enabled: false, totalCredits: 0 } }, { toolCounts: {}, agentCount: 0, tasks: { total: 0, completed: 0 } });
+  }, { ...defaultConfig, language: 'en', colors: { enabled: false }, display: { ...defaultConfig.display, showCredits: true }, credits: { enabled: false, totalCredits: 0 } }, { toolCounts: {}, agentCount: 0, tasks: { total: 0, completed: 0 } });
 
   assert.match(output, /credits .*88\/100/);
   assert.equal(output.split('\n')[2].includes('credits'), true);
@@ -145,6 +149,7 @@ test('renders estimated credits in English and clamps remaining at zero', () => 
     ...defaultConfig,
     language: 'en',
     colors: { enabled: false },
+    display: { ...defaultConfig.display, showCredits: true },
     credits: { enabled: true, totalCredits: 100, usedCreditsOffset: 80 }
   }, { creditTotal: 50, toolCounts: {}, agentCount: 0, tasks: { total: 0, completed: 0 } });
 
@@ -163,6 +168,7 @@ test('renders estimated credits in Chinese', () => {
     ...defaultConfig,
     language: 'zh',
     colors: { enabled: false },
+    display: { ...defaultConfig.display, showCredits: true },
     credits: { enabled: true, totalCredits: 500, usedCreditsOffset: 100 }
   }, { creditTotal: 86.5, toolCounts: {}, agentCount: 0, tasks: { total: 0, completed: 0 } });
 

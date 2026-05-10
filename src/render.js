@@ -254,6 +254,29 @@ function quotaSegment(config, t, quota) {
   return stat(config, t('hud.credits'), parts.join(' '), hue);
 }
 
+function buildActivityParts(config, t, transcriptSummary) {
+  const display = config.display || {};
+  const activityParts = [];
+
+  if (display.showTools) {
+    const tools = topTools(transcriptSummary.toolCounts);
+    activityParts.push(stat(config, t('hud.tools'), tools.length ? tools.join(' ') : t('hud.idle'), 'cyan'));
+  }
+  if (display.showAgents) {
+    activityParts.push(stat(config, t('hud.agents'), transcriptSummary.agentCount || 0, 'magenta'));
+  }
+  if (display.showTasks) {
+    const tasks = transcriptSummary.tasks || { total: 0, completed: 0 };
+    const total = num(tasks.total) || 0;
+    const completed = num(tasks.completed) || 0;
+    const taskPct = total ? (completed / total) * 100 : 0;
+    const taskBar = progressBar(config, taskPct, config.taskBarWidth || 8, total && completed >= total ? 'brightGreen' : 'brightCyan');
+    activityParts.push(stat(config, t('hud.tasks'), `${taskBar} ${completed}/${total}`, 'brightCyan'));
+  }
+
+  return activityParts;
+}
+
 function render(status, config, transcriptSummary = {}) {
   const safeStatus = status || {};
   const safeConfig = config || {};
@@ -290,8 +313,9 @@ function render(status, config, transcriptSummary = {}) {
     parts.push(contextLine);
   }
 
-  const credits = creditEstimate(safeStatus, safeConfig, transcriptSummary);
-  if (display.showTokens || display.showDuration || display.showLinesChanged || display.showCost || credits) {
+  const credits = display.showCredits === true ? creditEstimate(safeStatus, safeConfig, transcriptSummary) : null;
+  const activityParts = buildActivityParts(safeConfig, t, transcriptSummary);
+  if (display.showTokens || display.showCost || credits || activityParts.length) {
     const statParts = [];
     if (display.showTokens) {
       statParts.push(stat(safeConfig, t('hud.in'), formatTokens(ctx.totalInput), 'green'));
@@ -303,27 +327,9 @@ function render(status, config, transcriptSummary = {}) {
     if (display.showCost && Number.isFinite(num(cost.total_cost_usd))) {
       statParts.push(stat(safeConfig, '$', Number(cost.total_cost_usd).toFixed(4), 'brightYellow'));
     }
-    parts.push(`${label(safeConfig, t('hud.tok'), 'brightBlue')} ${joinParts(safeConfig, statParts)}`);
-  }
-
-  if (display.showTools || display.showAgents || display.showTasks) {
-    const activityParts = [];
-    if (display.showTools) {
-      const tools = topTools(transcriptSummary.toolCounts);
-      activityParts.push(stat(safeConfig, t('hud.tools'), tools.length ? tools.join(' ') : t('hud.idle'), 'cyan'));
-    }
-    if (display.showAgents) {
-      activityParts.push(stat(safeConfig, t('hud.agents'), transcriptSummary.agentCount || 0, 'magenta'));
-    }
-    if (display.showTasks) {
-      const tasks = transcriptSummary.tasks || { total: 0, completed: 0 };
-      const total = num(tasks.total) || 0;
-      const completed = num(tasks.completed) || 0;
-      const taskPct = total ? (completed / total) * 100 : 0;
-      const taskBar = progressBar(safeConfig, taskPct, safeConfig.taskBarWidth || 8, total && completed >= total ? 'brightGreen' : 'brightCyan');
-      activityParts.push(`${stat(safeConfig, t('hud.tasks'), `${taskBar} ${completed}/${total}`, 'brightCyan')}`);
-    }
-    parts.push(`${label(safeConfig, t('hud.act'), 'brightGreen')} ${joinParts(safeConfig, activityParts)}`);
+    statParts.push(...activityParts);
+    const lineLabel = display.showTokens ? t('hud.tok') : t('hud.act');
+    parts.push(`${label(safeConfig, lineLabel, display.showTokens ? 'brightBlue' : 'brightGreen')} ${joinParts(safeConfig, statParts)}`);
   }
 
   const maxLines = num(safeConfig.maxLines);
