@@ -23,6 +23,11 @@ const defaultConfig = {
     maxInitialReadBytes: 262144,
     cacheTtlMs: 1000
   },
+  credits: {
+    enabled: false,
+    totalCredits: 0,
+    usedCreditsOffset: 0
+  },
   display: {
     showModel: true,
     showProject: true,

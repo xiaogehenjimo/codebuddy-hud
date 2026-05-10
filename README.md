@@ -93,6 +93,9 @@ node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure list
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure get display.showCredits
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set language en
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set language zh
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.enabled true
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.totalCredits 500
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.usedCreditsOffset 100
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set barWidth 20
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure toggle display.showCredits
 ```
@@ -113,6 +116,22 @@ Language:
 | `en` | English HUD labels and CLI messages |
 
 `language` only changes HUD labels and command output. It does not translate model names, branch names, tool names, or token units.
+
+Estimated credits:
+
+```bash
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.enabled true
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.totalCredits 500
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.usedCreditsOffset 0
+```
+
+Formula:
+
+```text
+remaining = totalCredits - usedCreditsOffset - localTranscriptCredits
+```
+
+This is a local estimate from transcript credit usage. It is not an official account balance and may miss usage from other machines, projects, or cleaned transcripts.
 
 Important display flags:
 

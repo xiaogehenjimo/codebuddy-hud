@@ -194,6 +194,20 @@ function stat(config, key, value, hue = 'cyan') {
   return `${color(config, hue, key)} ${value}`;
 }
 
+function creditEstimate(config, transcriptSummary) {
+  const credits = config.credits || {};
+  const enabled = Boolean(credits.enabled || (config.display && config.display.showCredits));
+  const total = Math.max(0, num(credits.totalCredits) || 0);
+  if (!enabled || total <= 0) return null;
+
+  const offset = num(credits.usedCreditsOffset) || 0;
+  const transcriptUsed = num(transcriptSummary && transcriptSummary.creditTotal) || 0;
+  const used = Math.max(0, transcriptUsed + offset);
+  const remaining = Math.max(0, total - used);
+
+  return { remaining, total, used };
+}
+
 function render(status, config, transcriptSummary = {}) {
   const safeStatus = status || {};
   const safeConfig = config || {};
@@ -230,7 +244,8 @@ function render(status, config, transcriptSummary = {}) {
     parts.push(contextLine);
   }
 
-  if (display.showTokens || display.showDuration || display.showLinesChanged || display.showCost || display.showCredits) {
+  const credits = creditEstimate(safeConfig, transcriptSummary);
+  if (display.showTokens || display.showDuration || display.showLinesChanged || display.showCost || credits) {
     const statParts = [];
     if (display.showTokens) {
       statParts.push(stat(safeConfig, t('hud.in'), formatTokens(ctx.totalInput), 'green'));
@@ -246,8 +261,8 @@ function render(status, config, transcriptSummary = {}) {
     if (display.showCost && Number.isFinite(num(cost.total_cost_usd))) {
       statParts.push(stat(safeConfig, '$', Number(cost.total_cost_usd).toFixed(4), 'brightYellow'));
     }
-    if (display.showCredits) {
-      statParts.push(stat(safeConfig, t('hud.credits'), trim(num(transcriptSummary.creditTotal) || 0), 'brightBlue'));
+    if (credits) {
+      statParts.push(stat(safeConfig, t('hud.credits'), `${trim(credits.remaining)}/${trim(credits.total)}`, 'brightBlue'));
     }
     parts.push(`${label(safeConfig, t('hud.tok'), 'brightBlue')} ${joinParts(safeConfig, statParts)}`);
   }
@@ -275,4 +290,4 @@ function render(status, config, transcriptSummary = {}) {
   return parts.join('\n');
 }
 
-module.exports = { render, contextStats, formatTokens, formatDuration };
+module.exports = { render, contextStats, creditEstimate, formatTokens, formatDuration };

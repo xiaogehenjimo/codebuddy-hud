@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { render, contextStats, formatTokens, formatDuration } = require('../src/render');
+const { render, contextStats, creditEstimate, formatTokens, formatDuration } = require('../src/render');
 const { defaultConfig } = require('../src/config');
 
 test('formats token units with uppercase K and M', () => {
@@ -65,6 +65,55 @@ test('renders Chinese HUD labels when language is zh', () => {
   assert.match(output, /缓存 5\.8M/);
   assert.match(output, /工具 空闲/);
   assert.match(output, /任务/);
+});
+
+test('estimates remaining credits from transcript total and offset', () => {
+  assert.deepEqual(creditEstimate({ credits: { enabled: true, totalCredits: 500, usedCreditsOffset: 100 } }, { creditTotal: 86.5 }), {
+    remaining: 313.5,
+    total: 500,
+    used: 186.5
+  });
+});
+
+test('hides credit estimate when disabled or total is zero', () => {
+  assert.equal(creditEstimate({ credits: { enabled: false, totalCredits: 500 } }, { creditTotal: 1 }), null);
+  assert.equal(creditEstimate({ credits: { enabled: true, totalCredits: 0 } }, { creditTotal: 1 }), null);
+});
+
+test('renders estimated credits in English and clamps remaining at zero', () => {
+  const status = {
+    cwd: process.cwd(),
+    model: { display_name: 'GPT-5.5' },
+    workspace: { project_dir: process.cwd(), current_dir: process.cwd() },
+    cost: {},
+    context_window: {}
+  };
+  const output = render(status, {
+    ...defaultConfig,
+    language: 'en',
+    colors: { enabled: false },
+    credits: { enabled: true, totalCredits: 100, usedCreditsOffset: 80 }
+  }, { creditTotal: 50, toolCounts: {}, agentCount: 0, tasks: { total: 0, completed: 0 } });
+
+  assert.match(output, /credits 0\/100/);
+});
+
+test('renders estimated credits in Chinese', () => {
+  const status = {
+    cwd: process.cwd(),
+    model: { display_name: 'GPT-5.5' },
+    workspace: { project_dir: process.cwd(), current_dir: process.cwd() },
+    cost: {},
+    context_window: {}
+  };
+  const output = render(status, {
+    ...defaultConfig,
+    language: 'zh',
+    colors: { enabled: false },
+    credits: { enabled: true, totalCredits: 500, usedCreditsOffset: 100 }
+  }, { creditTotal: 86.5, toolCounts: {}, agentCount: 0, tasks: { total: 0, completed: 0 } });
+
+  assert.match(output, /积分 313\.5\/500/);
 });
 
 test('formats durations compactly', () => {

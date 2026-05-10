@@ -9,6 +9,9 @@ node bin/codebuddy-hud.js configure list
 node bin/codebuddy-hud.js configure get display.showCredits
 node bin/codebuddy-hud.js configure set language en
 node bin/codebuddy-hud.js configure set language zh
+node bin/codebuddy-hud.js configure set credits.enabled true
+node bin/codebuddy-hud.js configure set credits.totalCredits 500
+node bin/codebuddy-hud.js configure set credits.usedCreditsOffset 100
 node bin/codebuddy-hud.js configure set barWidth 20
 node bin/codebuddy-hud.js configure toggle display.showCredits
 node bin/codebuddy-hud.js configure preset minimal
@@ -31,6 +34,34 @@ node bin/codebuddy-hud.js configure reset
 | `en` | English HUD labels and CLI messages |
 
 `language` does not translate model names, branch names, tool names, paths, or token units.
+
+## Estimated credits
+
+```json
+{
+  "credits": {
+    "enabled": false,
+    "totalCredits": 0,
+    "usedCreditsOffset": 0
+  }
+}
+```
+
+Enable estimated remaining credits:
+
+```bash
+node bin/codebuddy-hud.js configure set credits.enabled true
+node bin/codebuddy-hud.js configure set credits.totalCredits 500
+node bin/codebuddy-hud.js configure set credits.usedCreditsOffset 0
+```
+
+Formula:
+
+```text
+remaining = totalCredits - usedCreditsOffset - localTranscriptCredits
+```
+
+This is a local estimate from transcript data, not an official account balance.
 
 ## Presets
 

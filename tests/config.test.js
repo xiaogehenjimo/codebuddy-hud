@@ -59,6 +59,18 @@ test('configure get/set/toggle works with isolated config', () => {
 
   result = run(['configure', 'get', 'language'], { env });
   assert.equal(result.stdout.trim(), '"en"');
+
+  result = run(['configure', 'set', 'credits.enabled', 'true'], { env });
+  assert.equal(result.status, 0, result.stderr);
+
+  result = run(['configure', 'set', 'credits.totalCredits', '500'], { env });
+  assert.equal(result.status, 0, result.stderr);
+
+  result = run(['configure', 'set', 'credits.usedCreditsOffset', '100'], { env });
+  assert.equal(result.status, 0, result.stderr);
+
+  result = run(['configure', 'get', 'credits.totalCredits'], { env });
+  assert.equal(result.stdout.trim(), '500');
 });
 
 test('setup and uninstall preserve previous statusLine', () => {
