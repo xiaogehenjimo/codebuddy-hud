@@ -65,7 +65,7 @@ const dictionaries = {
       title: 'CodeBuddy',
       git: '分支',
       ctx: '上下文',
-      tok: '令牌',
+      tok: '词元',
       cache: '缓存',
       in: '输入',
       out: '输出',

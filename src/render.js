@@ -307,10 +307,11 @@ function render(status, config, transcriptSummary = {}) {
     if (display.showCost && Number.isFinite(num(cost.total_cost_usd))) {
       statParts.push(stat(safeConfig, '$', Number(cost.total_cost_usd).toFixed(4), 'brightYellow'));
     }
-    if (credits) {
-      statParts.push(quotaSegment(safeConfig, t, credits));
-    }
     parts.push(`${label(safeConfig, t('hud.tok'), 'brightBlue')} ${joinParts(safeConfig, statParts)}`);
+  }
+
+  if (credits) {
+    parts.push(quotaSegment(safeConfig, t, credits));
   }
 
   if (display.showTools || display.showAgents || display.showTasks) {
