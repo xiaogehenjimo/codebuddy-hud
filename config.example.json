@@ -1,0 +1,34 @@
+{
+  "layout": "expanded",
+  "language": "zh",
+  "barWidth": 16,
+  "taskBarWidth": 8,
+  "maxWidth": 96,
+  "transcript": {
+    "enabled": true,
+    "maxInitialReadBytes": 262144,
+    "cacheTtlMs": 1000
+  },
+  "display": {
+    "showModel": true,
+    "showProject": true,
+    "showGit": true,
+    "showContext": true,
+    "showTokens": true,
+    "showCost": false,
+    "showCredits": false,
+    "showDuration": true,
+    "showLinesChanged": true,
+    "showTools": true,
+    "showAgents": true,
+    "showTasks": true,
+    "showCache": true
+  },
+  "thresholds": {
+    "contextWarning": 70,
+    "contextDanger": 90
+  },
+  "colors": {
+    "enabled": true
+  }
+}

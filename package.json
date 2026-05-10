@@ -1,0 +1,50 @@
+{
+  "name": "codebuddy-hud",
+  "version": "0.1.0",
+  "description": "A multi-line terminal HUD for CodeBuddy Code statusLine inspired by claude-hud.",
+  "private": false,
+  "license": "Apache-2.0",
+  "author": "xiaogehenjimo",
+  "homepage": "https://github.com/xiaogehenjimo/codebuddy-hud#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xiaogehenjimo/codebuddy-hud.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xiaogehenjimo/codebuddy-hud/issues"
+  },
+  "keywords": [
+    "codebuddy",
+    "codebuddy-code",
+    "statusline",
+    "hud",
+    "terminal",
+    "cli",
+    "tokens",
+    "context"
+  ],
+  "bin": {
+    "codebuddy-hud": "bin/codebuddy-hud.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "commands/",
+    "docs/",
+    ".codebuddy-plugin/",
+    "config.example.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node --check bin/codebuddy-hud.js && node --check src/*.js",
+    "check": "npm run build",
+    "test": "node --test tests/*.test.js",
+    "test:coverage": "node --test --experimental-test-coverage tests/*.test.js",
+    "test:stdin": "node bin/codebuddy-hud.js status < tests/fixtures/status.json",
+    "dev": "node bin/codebuddy-hud.js status < tests/fixtures/status.json"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

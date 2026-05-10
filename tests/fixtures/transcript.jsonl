@@ -1,0 +1,6 @@
+{"id":"1","timestamp":1,"type":"function_call","name":"Read","arguments":"{\"file_path\":\"README.md\"}","callId":"call_1","providerData":{"rawUsage":{"prompt_tokens":1000,"completion_tokens":100,"credit":1.2}}}
+{"id":"2","timestamp":2,"type":"function_call","name":"Bash","arguments":"{\"command\":\"npm test\"}","callId":"call_2"}
+{"id":"3","timestamp":3,"type":"function_call","name":"TaskCreate","arguments":"{\"subject\":\"Test\"}","callId":"call_3"}
+{"id":"4","timestamp":4,"type":"function_call","name":"TaskUpdate","arguments":"{\"taskId\":\"1\",\"status\":\"completed\"}","callId":"call_4"}
+{"id":"5","timestamp":5,"type":"function_call","name":"Agent","arguments":"{\"description\":\"Explore\"}","callId":"call_5"}
+not-json
