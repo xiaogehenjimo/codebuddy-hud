@@ -13,8 +13,8 @@ CodeBuddy HUD 是一个面向 CodeBuddy Code `statusLine` 的多行终端 HUD，
 
 ```text
 CodeBuddy · GPT-5.5 · live-iOS · git release/3.43.0 *
-上下文 █░░░░░░░░░░░░░░░ 9.2% · 词元 91.7K/1M · 缓存 5.8M · 变更 +168 -1
-词元 输入 715.9K · 输出 22.9K · 工具 Read×2 Bash×1 Glob×1 Grep×1 · 代理 0 · 任务 ████████ 1/1
+上下文 █░░░░░░░░░░░░░░░ 9.2% · 词元 91.7K/1M · 缓存 5.8M
+词元 输入 715.9K · 输出 22.9K · 变更 +168 -1
 ```
 
 ## 展示内容
@@ -26,9 +26,7 @@ CodeBuddy · GPT-5.5 · live-iOS · git release/3.43.0 *
 | 上下文占用 | `context_window.*` | `91.7K/1M · 9.2%` |
 | Cache token | `current_usage.cache_*` | `cache 5.8M` |
 | 词元总量 | `total_input_tokens`, `total_output_tokens` | `输入 715.9K · 输出 22.9K` |
-| 代码变更 | `cost.total_lines_*` | `变更 +168 -1` |
-| 工具调用 | transcript JSONL | `工具 Read×2 Bash×1` |
-| 代理和任务 | transcript JSONL | `代理 1 · 任务 2/5` |
+| 代码变更 | `cost.total_lines_*` | `变更 +168 -1`，显示在词元总量同一行 |
 | 积分/配额 | 官方字段、快照或 transcript 估算 | 默认隐藏，可配置开启 |
 
 ## 环境要求
@@ -203,9 +201,7 @@ node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure preset fu
 | `display.showCache` | `true` | 显示 prompt/cache token |
 | `display.showCost` | `false` | 显示 CodeBuddy 提供的 USD 成本 |
 | `display.showCredits` | `false` | 显示官方字段、快照或 transcript 估算得到的积分/配额 |
-| `display.showTools` | `true` | 显示工具调用统计，渲染在词元输入/输出同一行 |
-| `display.showAgents` | `true` | 显示代理数量，渲染在词元输入/输出同一行 |
-| `display.showTasks` | `true` | 显示任务进度，渲染在词元输入/输出同一行 |
+| `display.showLinesChanged` | `true` | 在词元总量同一行显示代码变更 |
 | `colors.enabled` | `true` | 是否启用 ANSI 颜色 |
 
 ## 上下文阈值

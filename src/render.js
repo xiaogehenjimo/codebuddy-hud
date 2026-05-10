@@ -175,22 +175,6 @@ function formatGit(git, t) {
   return `${t('hud.git')} ${ellipsize(git.branch, 24)}${suffix ? ` ${suffix}` : ''}`;
 }
 
-function shortToolName(name) {
-  const raw = String(name || 'tool');
-  const scoped = raw.includes('__') ? raw.split('__').filter(Boolean).pop() : raw;
-  const compact = scoped.replace(/Tool$/, '');
-  return ellipsize(compact, 16);
-}
-
-function topTools(toolCounts) {
-  const ignored = new Set(['TaskCreate', 'TaskUpdate', 'TaskGet', 'TaskList']);
-  return Object.entries(toolCounts || {})
-    .filter(([name, count]) => count > 0 && !ignored.has(name))
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .slice(0, 5)
-    .map(([name, count]) => `${shortToolName(name)}×${count}`);
-}
-
 function stat(config, key, value, hue = 'cyan') {
   return `${color(config, hue, key)} ${value}`;
 }
@@ -254,29 +238,6 @@ function quotaSegment(config, t, quota) {
   return stat(config, t('hud.credits'), parts.join(' '), hue);
 }
 
-function buildActivityParts(config, t, transcriptSummary) {
-  const display = config.display || {};
-  const activityParts = [];
-
-  if (display.showTools) {
-    const tools = topTools(transcriptSummary.toolCounts);
-    activityParts.push(stat(config, t('hud.tools'), tools.length ? tools.join(' ') : t('hud.idle'), 'cyan'));
-  }
-  if (display.showAgents) {
-    activityParts.push(stat(config, t('hud.agents'), transcriptSummary.agentCount || 0, 'magenta'));
-  }
-  if (display.showTasks) {
-    const tasks = transcriptSummary.tasks || { total: 0, completed: 0 };
-    const total = num(tasks.total) || 0;
-    const completed = num(tasks.completed) || 0;
-    const taskPct = total ? (completed / total) * 100 : 0;
-    const taskBar = progressBar(config, taskPct, config.taskBarWidth || 8, total && completed >= total ? 'brightGreen' : 'brightCyan');
-    activityParts.push(stat(config, t('hud.tasks'), `${taskBar} ${completed}/${total}`, 'brightCyan'));
-  }
-
-  return activityParts;
-}
-
 function render(status, config, transcriptSummary = {}) {
   const safeStatus = status || {};
   const safeConfig = config || {};
@@ -307,19 +268,20 @@ function render(status, config, transcriptSummary = {}) {
     const contextLine = joinParts(safeConfig, [
       `${label(safeConfig, t('hud.ctx'), 'brightMagenta')} ${contextBar} ${color(safeConfig, ['bold', ctxColor], formatPercent(ctx.pct))}`,
       stat(safeConfig, t('hud.tok'), tokens, 'cyan'),
-      display.showCache && ctx.cache ? stat(safeConfig, t('hud.cache'), formatTokens(ctx.cache), 'blue') : null,
-      display.showLinesChanged ? stat(safeConfig, t('hud.changes'), `+${num(cost.total_lines_added) || 0} -${num(cost.total_lines_removed) || 0}`, 'magenta') : null
+      display.showCache && ctx.cache ? stat(safeConfig, t('hud.cache'), formatTokens(ctx.cache), 'blue') : null
     ]);
     parts.push(contextLine);
   }
 
   const credits = display.showCredits === true ? creditEstimate(safeStatus, safeConfig, transcriptSummary) : null;
-  const activityParts = buildActivityParts(safeConfig, t, transcriptSummary);
-  if (display.showTokens || display.showCost || credits || activityParts.length) {
+  if (display.showTokens || display.showLinesChanged || display.showCost || credits) {
     const statParts = [];
     if (display.showTokens) {
       statParts.push(stat(safeConfig, t('hud.in'), formatTokens(ctx.totalInput), 'green'));
       statParts.push(stat(safeConfig, t('hud.out'), formatTokens(ctx.totalOutput), 'green'));
+    }
+    if (display.showLinesChanged) {
+      statParts.push(stat(safeConfig, t('hud.changes'), `+${num(cost.total_lines_added) || 0} -${num(cost.total_lines_removed) || 0}`, 'magenta'));
     }
     if (credits) {
       statParts.push(quotaSegment(safeConfig, t, credits));
@@ -327,9 +289,7 @@ function render(status, config, transcriptSummary = {}) {
     if (display.showCost && Number.isFinite(num(cost.total_cost_usd))) {
       statParts.push(stat(safeConfig, '$', Number(cost.total_cost_usd).toFixed(4), 'brightYellow'));
     }
-    statParts.push(...activityParts);
-    const lineLabel = display.showTokens ? t('hud.tok') : t('hud.act');
-    parts.push(`${label(safeConfig, lineLabel, display.showTokens ? 'brightBlue' : 'brightGreen')} ${joinParts(safeConfig, statParts)}`);
+    parts.push(`${label(safeConfig, t('hud.tok'), 'brightBlue')} ${joinParts(safeConfig, statParts)}`);
   }
 
   const maxLines = num(safeConfig.maxLines);

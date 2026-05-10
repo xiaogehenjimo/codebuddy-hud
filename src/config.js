@@ -49,9 +49,9 @@ const defaultConfig = {
     showCredits: false,
     showDuration: true,
     showLinesChanged: true,
-    showTools: true,
-    showAgents: true,
-    showTasks: true,
+    showTools: false,
+    showAgents: false,
+    showTasks: false,
     showCache: true
   },
   thresholds: {

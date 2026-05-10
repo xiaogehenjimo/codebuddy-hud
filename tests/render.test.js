@@ -42,11 +42,12 @@ test('renders multiline HUD without credits by default', () => {
   assert.match(output, /CodeBuddy/);
   assert.match(output, /91\.7K\/1M/);
   assert.match(output, /cache 5\.8M/);
-  assert.match(output, /Changes \+1 -2/);
+  assert.match(output.split('\n')[2], /Changes \+1 -2/);
+  assert.doesNotMatch(output.split('\n')[1], /Changes/);
   assert.doesNotMatch(output, /credits/);
-  assert.match(output.split('\n')[2], /tools Read×1/);
-  assert.match(output.split('\n')[2], /agents 0/);
-  assert.match(output.split('\n')[2], /tasks/);
+  assert.doesNotMatch(output, /tools/);
+  assert.doesNotMatch(output, /agents/);
+  assert.doesNotMatch(output, /tasks/);
   assert.equal(output.split('\n').length, 3);
 });
 
@@ -69,11 +70,12 @@ test('renders Chinese HUD labels when language is zh', () => {
   assert.match(output, /词元/);
   assert.doesNotMatch(output, /令牌/);
   assert.match(output, /缓存 5\.8M/);
-  assert.match(output, /变更 \+1 -2/);
+  assert.match(output.split('\n')[2], /变更 \+1 -2/);
+  assert.doesNotMatch(output.split('\n')[1], /变更/);
   assert.doesNotMatch(output, /Δ/);
-  assert.match(output.split('\n')[2], /工具 空闲/);
-  assert.match(output.split('\n')[2], /代理 0/);
-  assert.match(output.split('\n')[2], /任务/);
+  assert.doesNotMatch(output, /工具/);
+  assert.doesNotMatch(output, /代理/);
+  assert.doesNotMatch(output, /任务/);
 });
 
 test('estimates remaining credits from transcript total and offset', () => {

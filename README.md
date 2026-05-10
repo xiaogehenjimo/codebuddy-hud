@@ -13,8 +13,8 @@ CodeBuddy HUD runs as a native CodeBuddy `statusLine` command. It reads the JSON
 
 ```text
 CodeBuddy · GPT-5.5 · live-iOS · git release/3.43.0 *
-ctx █░░░░░░░░░░░░░░░ 9.2% · tok 91.7K/1M · cache 5.8M · Changes +168 -1
-tok in 715.9K · out 22.9K · tools Read×2 Bash×1 Glob×1 Grep×1 · agents 0 · tasks ████████ 1/1
+ctx █░░░░░░░░░░░░░░░ 9.2% · tok 91.7K/1M · cache 5.8M
+tok in 715.9K · out 22.9K · Changes +168 -1
 ```
 
 ## What it shows
@@ -26,9 +26,7 @@ tok in 715.9K · out 22.9K · tools Read×2 Bash×1 Glob×1 Grep×1 · agents 0 
 | Context health | `context_window.*` | `91.7K/1M · 9.2%` |
 | Cache tokens | `current_usage.cache_*` | `cache 5.8M` |
 | Token totals | `total_input_tokens`, `total_output_tokens` | `in 715.9K · out 22.9K` |
-| Code changes | `cost.total_lines_*` | `Changes +168 -1` |
-| Tool activity | Transcript JSONL | `tools Read×2 Bash×1` |
-| Agents and tasks | Transcript JSONL | `agents 1 · tasks 2/5` |
+| Code changes | `cost.total_lines_*` | `Changes +168 -1` on the token totals line |
 | Credits/quota | Official fields, snapshot, or transcript estimate | Hidden by default, configurable |
 
 ## Requirements
@@ -171,9 +169,7 @@ Important display flags:
 | `display.showCache` | `true` | Prompt/cache token segment |
 | `display.showCost` | `false` | USD cost from CodeBuddy when available |
 | `display.showCredits` | `false` | Credit/quota segment from official fields, snapshot, or transcript estimate |
-| `display.showTools` | `true` | Tool call counts from transcript, rendered on the token totals line |
-| `display.showAgents` | `true` | Agent call count, rendered on the token totals line |
-| `display.showTasks` | `true` | Task progress, rendered on the token totals line |
+| `display.showLinesChanged` | `true` | Code changes on the token totals line |
 | `colors.enabled` | `true` | ANSI color output |
 
 ## Context thresholds
