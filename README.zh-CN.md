@@ -126,6 +126,15 @@ node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure get displ
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set barWidth 20
 ```
 
+切换语言：
+
+```bash
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set language zh
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set language en
+```
+
+`language` 只影响 HUD 标签和命令行提示，不会翻译模型名、分支名、工具名或 token 单位。
+
 切换布尔开关：
 
 ```bash

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const { defaultConfig, loadConfig, ensureConfig, setupStatusLine, uninstallStatusLine, paths, writeJson } = require('./config');
+const { createTranslator } = require('./i18n');
 const { render } = require('./render');
 const { summarizeTranscript } = require('./transcript');
 
@@ -36,7 +37,7 @@ function commandStatus() {
   try {
     process.stdout.write(`${render(status, config, summary)}\n`);
   } catch {
-    const model = status.model && (status.model.display_name || status.model.id) || 'CodeBuddy';
+    const model = status.model && (status.model.display_name || status.model.id) || createTranslator(config)('hud.title');
     process.stdout.write(`${model}\n`);
   }
 }
@@ -55,20 +56,25 @@ function collectPaths(value, prefix = '') {
 }
 
 function commandInspect() {
+  const config = loadConfig();
+  const t = createTranslator(config);
   const status = parseStatus(readStdin());
-  const lines = ['top-level keys:', ...Object.keys(status).map((key) => `  ${key}`), '', 'paths:', ...collectPaths(status).map((line) => `  ${line}`)];
+  const lines = [t('cli.topLevelKeys'), ...Object.keys(status).map((key) => `  ${key}`), '', t('cli.paths'), ...collectPaths(status).map((line) => `  ${line}`)];
   process.stdout.write(`${lines.join('\n')}\n`);
 }
 
 function commandSetup() {
-  ensureConfig();
+  const config = ensureConfig();
+  const t = createTranslator(config);
   const result = setupStatusLine();
-  process.stdout.write(`Configured CodeBuddy HUD statusLine\n${result.settingsPath}\n${result.command}\n`);
+  process.stdout.write(`${t('cli.configured')}\n${result.settingsPath}\n${result.command}\n`);
 }
 
 function commandUninstall() {
+  const config = loadConfig();
+  const t = createTranslator(config);
   const result = uninstallStatusLine();
-  process.stdout.write(`Updated ${result.settingsPath}\n${result.restored ? 'Restored previous statusLine' : 'Removed CodeBuddy HUD statusLine'}\n`);
+  process.stdout.write(`${t('cli.updated')} ${result.settingsPath}\n${result.restored ? t('cli.restoredPrevious') : t('cli.removedHud')}\n`);
 }
 
 function commandConfigPath() {
@@ -96,9 +102,9 @@ function getConfigValue(config, keyPath) {
   }, config);
 }
 
-function setConfigValue(config, keyPath, value) {
+function setConfigValue(config, keyPath, value, t = createTranslator(config)) {
   const keys = keyPath.split('.').filter(Boolean);
-  if (!keys.length) throw new Error('missing config path');
+  if (!keys.length) throw new Error(t('error.missingConfigPath'));
   let target = config;
   for (const key of keys.slice(0, -1)) {
     if (!target[key] || typeof target[key] !== 'object' || Array.isArray(target[key])) target[key] = {};
@@ -107,8 +113,8 @@ function setConfigValue(config, keyPath, value) {
   target[keys[keys.length - 1]] = value;
 }
 
-function printConfigureHelp() {
-  process.stdout.write(`CodeBuddy HUD config\n\nConfig file:\n  ${paths.configPath}\n\nUsage:\n  codebuddy-hud.js configure list\n  codebuddy-hud.js configure get <path>\n  codebuddy-hud.js configure set <path> <value>\n  codebuddy-hud.js configure toggle <path>\n  codebuddy-hud.js configure preset <default|minimal|full>\n  codebuddy-hud.js configure reset\n\nExamples:\n  codebuddy-hud.js configure toggle display.showCredits\n  codebuddy-hud.js configure set barWidth 20\n  codebuddy-hud.js configure set colors.enabled false\n  codebuddy-hud.js configure preset full\n`);
+function printConfigureHelp(t) {
+  process.stdout.write(`${t('cli.configTitle')}\n\n${t('cli.configFile')}\n  ${paths.configPath}\n\n${t('cli.usage')}\n  codebuddy-hud.js configure list\n  codebuddy-hud.js configure get <path>\n  codebuddy-hud.js configure set <path> <value>\n  codebuddy-hud.js configure toggle <path>\n  codebuddy-hud.js configure preset <default|minimal|full>\n  codebuddy-hud.js configure reset\n\n${t('cli.examples')}\n  codebuddy-hud.js configure set language en\n  codebuddy-hud.js configure toggle display.showCredits\n  codebuddy-hud.js configure set barWidth 20\n  codebuddy-hud.js configure set colors.enabled false\n  codebuddy-hud.js configure preset full\n`);
 }
 
 function presetConfig(name) {
@@ -139,13 +145,13 @@ function presetConfig(name) {
 }
 
 function commandConfigure(args) {
+  const config = loadConfig();
+  const t = createTranslator(config);
   const action = args[0];
   if (!action || action === 'help' || action === '--help' || action === '-h') {
-    printConfigureHelp();
+    printConfigureHelp(t);
     return;
   }
-
-  const config = loadConfig();
 
   if (action === 'list') {
     process.stdout.write(`${JSON.stringify(config, null, 2)}\n`);
@@ -154,48 +160,48 @@ function commandConfigure(args) {
 
   if (action === 'get') {
     const keyPath = args[1];
-    if (!keyPath) throw new Error('configure get requires <path>');
+    if (!keyPath) throw new Error(t('error.getRequiresPath'));
     process.stdout.write(`${JSON.stringify(getConfigValue(config, keyPath), null, 2)}\n`);
     return;
   }
 
   if (action === 'set') {
     const keyPath = args[1];
-    if (!keyPath || args.length < 3) throw new Error('configure set requires <path> <value>');
+    if (!keyPath || args.length < 3) throw new Error(t('error.setRequiresPathValue'));
     const value = parseConfigValue(args.slice(2).join(' '));
-    setConfigValue(config, keyPath, value);
+    setConfigValue(config, keyPath, value, t);
     writeJson(paths.configPath, config);
-    process.stdout.write(`Set ${keyPath} = ${JSON.stringify(value)}\n`);
+    process.stdout.write(`${t('cli.set')} ${keyPath} = ${JSON.stringify(value)}\n`);
     return;
   }
 
   if (action === 'toggle') {
     const keyPath = args[1];
-    if (!keyPath) throw new Error('configure toggle requires <path>');
+    if (!keyPath) throw new Error(t('error.toggleRequiresPath'));
     const current = getConfigValue(config, keyPath);
-    if (typeof current !== 'boolean') throw new Error(`${keyPath} is not a boolean`);
-    setConfigValue(config, keyPath, !current);
+    if (typeof current !== 'boolean') throw new Error(t('error.notBoolean', { path: keyPath }));
+    setConfigValue(config, keyPath, !current, t);
     writeJson(paths.configPath, config);
-    process.stdout.write(`Set ${keyPath} = ${JSON.stringify(!current)}\n`);
+    process.stdout.write(`${t('cli.set')} ${keyPath} = ${JSON.stringify(!current)}\n`);
     return;
   }
 
   if (action === 'preset') {
     const name = args[1];
     const next = presetConfig(name);
-    if (!next) throw new Error('configure preset requires default, minimal, or full');
+    if (!next) throw new Error(t('error.presetRequiresName'));
     writeJson(paths.configPath, next);
-    process.stdout.write(`Applied ${name} preset\n`);
+    process.stdout.write(`${t('cli.appliedPreset', { name })}\n`);
     return;
   }
 
   if (action === 'reset') {
     writeJson(paths.configPath, defaultConfig);
-    process.stdout.write('Reset HUD config to defaults\n');
+    process.stdout.write(`${t('cli.resetConfig')}\n`);
     return;
   }
 
-  throw new Error(`unknown configure action: ${action}`);
+  throw new Error(t('error.unknownConfigureAction', { action }));
 }
 
 const command = process.argv[2] || 'status';
@@ -208,7 +214,7 @@ try {
   else if (command === 'config-path') commandConfigPath();
   else if (command === 'configure' || command === 'config') commandConfigure(process.argv.slice(3));
   else {
-    process.stderr.write('Usage: codebuddy-hud.js <status|inspect|setup|uninstall|config-path|configure>\n');
+    process.stderr.write(`${createTranslator(loadConfig())('error.usage')}\n`);
     process.exit(2);
   }
 } catch (error) {

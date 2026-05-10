@@ -37,13 +37,34 @@ test('renders multiline HUD without credits by default', () => {
       used_percentage: 9.17,
       current_usage: { input_tokens: 91000, output_tokens: 700, cache_read_input_tokens: 5800000 }
     }
-  }, { ...defaultConfig, colors: { enabled: false } }, { creditTotal: 123, toolCounts: { Read: 1 }, agentCount: 0, tasks: { total: 1, completed: 1 } });
+  }, { ...defaultConfig, language: 'en', colors: { enabled: false } }, { creditTotal: 123, toolCounts: { Read: 1 }, agentCount: 0, tasks: { total: 1, completed: 1 } });
 
   assert.match(output, /CodeBuddy/);
   assert.match(output, /91\.7K\/1M/);
   assert.match(output, /cache 5\.8M/);
   assert.doesNotMatch(output, /credits/);
   assert.equal(output.split('\n').length, 4);
+});
+
+test('renders Chinese HUD labels when language is zh', () => {
+  const output = render({
+    cwd: process.cwd(),
+    model: { display_name: 'GPT-5.5' },
+    workspace: { project_dir: process.cwd(), current_dir: process.cwd() },
+    cost: { total_duration_ms: 60000, total_api_duration_ms: 30000, total_lines_added: 1, total_lines_removed: 2 },
+    context_window: {
+      total_input_tokens: 91700,
+      total_output_tokens: 1000,
+      context_window_size: 1000000,
+      used_percentage: 9.17,
+      current_usage: { input_tokens: 91000, output_tokens: 700, cache_read_input_tokens: 5800000 }
+    }
+  }, { ...defaultConfig, language: 'zh', colors: { enabled: false } }, { toolCounts: {}, agentCount: 0, tasks: { total: 0, completed: 0 } });
+
+  assert.match(output, /上下文/);
+  assert.match(output, /缓存 5\.8M/);
+  assert.match(output, /工具 空闲/);
+  assert.match(output, /任务/);
 });
 
 test('formats durations compactly', () => {

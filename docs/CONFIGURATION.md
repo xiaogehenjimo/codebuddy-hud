@@ -7,6 +7,8 @@ CodeBuddy HUD stores user configuration in `config.json` next to the plugin. The
 ```bash
 node bin/codebuddy-hud.js configure list
 node bin/codebuddy-hud.js configure get display.showCredits
+node bin/codebuddy-hud.js configure set language en
+node bin/codebuddy-hud.js configure set language zh
 node bin/codebuddy-hud.js configure set barWidth 20
 node bin/codebuddy-hud.js configure toggle display.showCredits
 node bin/codebuddy-hud.js configure preset minimal
@@ -14,6 +16,21 @@ node bin/codebuddy-hud.js configure reset
 ```
 
 `configure` can be shortened to `config`.
+
+## Language
+
+```json
+{
+  "language": "zh"
+}
+```
+
+| Value | Description |
+| --- | --- |
+| `zh` | Chinese HUD labels and CLI messages |
+| `en` | English HUD labels and CLI messages |
+
+`language` does not translate model names, branch names, tool names, paths, or token units.
 
 ## Presets
 

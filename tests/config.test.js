@@ -53,6 +53,12 @@ test('configure get/set/toggle works with isolated config', () => {
 
   result = run(['configure', 'get', 'barWidth'], { env });
   assert.equal(result.stdout.trim(), '20');
+
+  result = run(['configure', 'set', 'language', 'en'], { env });
+  assert.equal(result.status, 0, result.stderr);
+
+  result = run(['configure', 'get', 'language'], { env });
+  assert.equal(result.stdout.trim(), '"en"');
 });
 
 test('setup and uninstall preserve previous statusLine', () => {
@@ -80,6 +86,23 @@ test('status command renders fixture JSON', () => {
   const stdout = stripAnsi(result.stdout);
   assert.match(stdout, /CodeBuddy/);
   assert.match(stdout, /91\.7K\/1M/);
-  assert.match(stdout, /cache 5\.8M/);
-  assert.doesNotMatch(stdout, /credits/);
+  assert.match(stdout, /缓存 5\.8M/);
+  assert.doesNotMatch(stdout, /积分/);
+});
+
+test('CLI help and inspect use configured English language', () => {
+  const { env } = tempEnv();
+
+  let result = run(['configure', 'set', 'language', 'en'], { env });
+  assert.equal(result.status, 0, result.stderr);
+
+  result = run(['configure', 'help'], { env });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /Config file:/);
+  assert.match(result.stdout, /Examples:/);
+
+  result = run(['inspect'], { env, input: '{"foo":{"bar":1}}' });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /top-level keys:/);
+  assert.match(result.stdout, /paths:/);
 });

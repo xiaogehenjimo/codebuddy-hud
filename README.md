@@ -91,6 +91,8 @@ The first run creates `config.json` next to the plugin. A clean example is track
 ```bash
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure list
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure get display.showCredits
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set language en
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set language zh
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set barWidth 20
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure toggle display.showCredits
 ```
@@ -102,6 +104,15 @@ node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure preset mi
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure preset default
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure preset full
 ```
+
+Language:
+
+| Value | Description |
+| --- | --- |
+| `zh` | Chinese HUD labels and CLI messages |
+| `en` | English HUD labels and CLI messages |
+
+`language` only changes HUD labels and command output. It does not translate model names, branch names, tool names, or token units.
 
 Important display flags:
 

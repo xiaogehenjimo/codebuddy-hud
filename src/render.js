@@ -1,5 +1,6 @@
 const path = require('path');
 const { getGitInfo } = require('./git');
+const { createTranslator } = require('./i18n');
 
 const ANSI = {
   reset: '\x1b[0m',
@@ -164,13 +165,13 @@ function pctColor(config, pct) {
   return 'brightGreen';
 }
 
-function formatGit(git) {
+function formatGit(git, t) {
   if (!git || !git.branch) return '';
   const dirty = git.dirty ? '*' : '';
   const ahead = git.ahead ? `↑${git.ahead}` : '';
   const behind = git.behind ? `↓${git.behind}` : '';
   const suffix = [dirty, ahead, behind].filter(Boolean).join(' ');
-  return `git ${ellipsize(git.branch, 24)}${suffix ? ` ${suffix}` : ''}`;
+  return `${t('hud.git')} ${ellipsize(git.branch, 24)}${suffix ? ` ${suffix}` : ''}`;
 }
 
 function shortToolName(name) {
@@ -197,18 +198,19 @@ function render(status, config, transcriptSummary = {}) {
   const safeStatus = status || {};
   const safeConfig = config || {};
   const display = safeConfig.display || {};
+  const t = createTranslator(safeConfig);
   const cwd = safeStatus.cwd || (safeStatus.workspace && safeStatus.workspace.current_dir) || process.cwd();
-  const model = (safeStatus.model && (safeStatus.model.display_name || safeStatus.model.id)) || 'CodeBuddy';
+  const model = (safeStatus.model && (safeStatus.model.display_name || safeStatus.model.id)) || t('hud.title');
   const work = workspaceName(safeStatus, cwd);
   const git = display.showGit ? getGitInfo(cwd) : null;
-  const gitText = formatGit(git);
+  const gitText = formatGit(git, t);
   const ctx = contextStats(safeStatus);
   const ctxColor = pctColor(safeConfig, ctx.pct);
   const cost = safeStatus.cost || {};
   const parts = [];
 
   const headerParts = [
-    color(safeConfig, ['bold', 'white'], 'CodeBuddy'),
+    color(safeConfig, ['bold', 'white'], t('hud.title')),
     display.showModel ? color(safeConfig, 'brightCyan', ellipsize(model, 28)) : null,
     display.showProject ? color(safeConfig, 'brightMagenta', work) : null,
     gitText ? color(safeConfig, git && git.dirty ? 'brightYellow' : 'brightGreen', gitText) : null
@@ -220,10 +222,10 @@ function render(status, config, transcriptSummary = {}) {
     const contextBar = progressBar(safeConfig, ctx.pct, width, ctxColor);
     const tokens = ctx.limit ? `${formatTokens(ctx.used)}/${formatTokens(ctx.limit)}` : formatTokens(ctx.used);
     const contextLine = joinParts(safeConfig, [
-      `${label(safeConfig, 'ctx', 'brightMagenta')} ${contextBar} ${color(safeConfig, ['bold', ctxColor], formatPercent(ctx.pct))}`,
-      stat(safeConfig, 'tok', tokens, 'cyan'),
+      `${label(safeConfig, t('hud.ctx'), 'brightMagenta')} ${contextBar} ${color(safeConfig, ['bold', ctxColor], formatPercent(ctx.pct))}`,
+      stat(safeConfig, t('hud.tok'), tokens, 'cyan'),
       safeStatus.exceeds_200k_tokens ? color(safeConfig, ['bold', 'brightYellow'], '>200k') : null,
-      display.showCache && ctx.cache ? stat(safeConfig, 'cache', formatTokens(ctx.cache), 'blue') : null
+      display.showCache && ctx.cache ? stat(safeConfig, t('hud.cache'), formatTokens(ctx.cache), 'blue') : null
     ]);
     parts.push(contextLine);
   }
@@ -231,12 +233,12 @@ function render(status, config, transcriptSummary = {}) {
   if (display.showTokens || display.showDuration || display.showLinesChanged || display.showCost || display.showCredits) {
     const statParts = [];
     if (display.showTokens) {
-      statParts.push(stat(safeConfig, 'in', formatTokens(ctx.totalInput), 'green'));
-      statParts.push(stat(safeConfig, 'out', formatTokens(ctx.totalOutput), 'green'));
+      statParts.push(stat(safeConfig, t('hud.in'), formatTokens(ctx.totalInput), 'green'));
+      statParts.push(stat(safeConfig, t('hud.out'), formatTokens(ctx.totalOutput), 'green'));
     }
     if (display.showDuration) {
-      statParts.push(stat(safeConfig, 'time', formatDuration(cost.total_duration_ms), 'yellow'));
-      statParts.push(stat(safeConfig, 'api', formatDuration(cost.total_api_duration_ms), 'yellow'));
+      statParts.push(stat(safeConfig, t('hud.time'), formatDuration(cost.total_duration_ms), 'yellow'));
+      statParts.push(stat(safeConfig, t('hud.api'), formatDuration(cost.total_api_duration_ms), 'yellow'));
     }
     if (display.showLinesChanged) {
       statParts.push(stat(safeConfig, 'Δ', `+${num(cost.total_lines_added) || 0} -${num(cost.total_lines_removed) || 0}`, 'magenta'));
@@ -245,19 +247,19 @@ function render(status, config, transcriptSummary = {}) {
       statParts.push(stat(safeConfig, '$', Number(cost.total_cost_usd).toFixed(4), 'brightYellow'));
     }
     if (display.showCredits) {
-      statParts.push(stat(safeConfig, 'credits', trim(num(transcriptSummary.creditTotal) || 0), 'brightBlue'));
+      statParts.push(stat(safeConfig, t('hud.credits'), trim(num(transcriptSummary.creditTotal) || 0), 'brightBlue'));
     }
-    parts.push(`${label(safeConfig, 'tok', 'brightBlue')} ${joinParts(safeConfig, statParts)}`);
+    parts.push(`${label(safeConfig, t('hud.tok'), 'brightBlue')} ${joinParts(safeConfig, statParts)}`);
   }
 
   if (display.showTools || display.showAgents || display.showTasks) {
     const activityParts = [];
     if (display.showTools) {
       const tools = topTools(transcriptSummary.toolCounts);
-      activityParts.push(stat(safeConfig, 'tools', tools.length ? tools.join(' ') : 'idle', 'cyan'));
+      activityParts.push(stat(safeConfig, t('hud.tools'), tools.length ? tools.join(' ') : t('hud.idle'), 'cyan'));
     }
     if (display.showAgents) {
-      activityParts.push(stat(safeConfig, 'agents', transcriptSummary.agentCount || 0, 'magenta'));
+      activityParts.push(stat(safeConfig, t('hud.agents'), transcriptSummary.agentCount || 0, 'magenta'));
     }
     if (display.showTasks) {
       const tasks = transcriptSummary.tasks || { total: 0, completed: 0 };
@@ -265,9 +267,9 @@ function render(status, config, transcriptSummary = {}) {
       const completed = num(tasks.completed) || 0;
       const taskPct = total ? (completed / total) * 100 : 0;
       const taskBar = progressBar(safeConfig, taskPct, safeConfig.taskBarWidth || 8, total && completed >= total ? 'brightGreen' : 'brightCyan');
-      activityParts.push(`${stat(safeConfig, 'tasks', `${taskBar} ${completed}/${total}`, 'brightCyan')}`);
+      activityParts.push(`${stat(safeConfig, t('hud.tasks'), `${taskBar} ${completed}/${total}`, 'brightCyan')}`);
     }
-    parts.push(`${label(safeConfig, 'act', 'brightGreen')} ${joinParts(safeConfig, activityParts)}`);
+    parts.push(`${label(safeConfig, t('hud.act'), 'brightGreen')} ${joinParts(safeConfig, activityParts)}`);
   }
 
   return parts.join('\n');
