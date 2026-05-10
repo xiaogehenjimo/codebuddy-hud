@@ -73,7 +73,38 @@ quota.remainingCredits / quota.totalCredits
 usedCredits + totalCredits variants
 ```
 
-If official fields are absent, the HUD falls back to local transcript data. The local estimate is not an official account balance.
+If official fields are absent, HUD can read an explicit quota snapshot:
+
+```bash
+node bin/codebuddy-hud.js configure set credits.snapshotPath ~/.codebuddy/quota.json
+node bin/codebuddy-hud.js configure set credits.maxStalenessMs 3600000
+node bin/codebuddy-hud.js configure set credits.warningRemainingPercent 25
+node bin/codebuddy-hud.js configure set credits.dangerRemainingPercent 10
+```
+
+Snapshot schema:
+
+```json
+{
+  "quota": {
+    "remaining": 75,
+    "used": 25,
+    "total": 100,
+    "addon": 10,
+    "plan": "Pro",
+    "resetAt": "2026-06-01T00:00:00Z",
+    "updatedAt": "2026-05-10T06:00:00Z"
+  }
+}
+```
+
+Source priority:
+
+```text
+official statusLine fields > quota snapshot > local transcript estimate
+```
+
+`refreshCommand` is stored as configuration only in the current version; it is not executed during `status` rendering. HUD does not read credentials or call undocumented APIs by default.
 
 ## Presets
 

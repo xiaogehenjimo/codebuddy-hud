@@ -147,10 +147,31 @@ node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credi
 剩余积分 = 总积分 - 历史已用偏移 - 本地 transcript 统计积分
 ```
 
-如果未来 CodeBuddy 在 statusLine JSON 中提供官方积分/账单字段，HUD 会优先读取，例如 `credits.remaining_credits`、`credits.total_credits`、`billing.remainingCredits`、`billing.totalCredits`、`plan.*` 或 `quota.*`。如果官方字段不存在，则回退到本地 transcript 估算。
+如果未来 CodeBuddy 在 statusLine JSON 中提供官方积分/账单字段，HUD 会优先读取，例如 `credits.remaining_credits`、`credits.total_credits`、`billing.remainingCredits`、`billing.totalCredits`、`plan.*` 或 `quota.*`。
 
-注意：本地估算不是官方账号余额。其它机器、其它项目或已清理 transcript 的消耗可能无法统计。
+如果官方字段不存在，HUD 可以读取你显式配置的本地配额快照：
+
+```bash
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.snapshotPath ~/.codebuddy/quota.json
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.maxStalenessMs 3600000
 ```
+
+快照示例：
+
+```json
+{
+  "quota": {
+    "remaining": 75,
+    "used": 25,
+    "total": 100,
+    "plan": "Pro",
+    "resetAt": "2026-06-01T00:00:00Z",
+    "updatedAt": "2026-05-10T06:00:00Z"
+  }
+}
+```
+
+如果官方字段和快照都不存在，则回退到本地 transcript 估算。本地估算不是官方账号余额。其它机器、其它项目或已清理 transcript 的消耗可能无法统计。HUD 在 `status` 渲染期间不会读取凭据，也不会调用未文档化的 API。
 
 `language` 只影响 HUD 标签和命令行提示，不会翻译模型名、分支名、工具名或 token 单位。
 

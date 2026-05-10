@@ -11,6 +11,16 @@ const dictionaries = {
       time: 'time',
       api: 'api',
       credits: 'credits',
+      used: 'used',
+      addon: 'addon',
+      reset: 'reset',
+      updated: 'updated',
+      stale: 'stale',
+      source: {
+        official: 'official',
+        snapshot: 'snapshot',
+        local: 'local'
+      },
       tools: 'tools',
       idle: 'idle',
       agents: 'agents',
@@ -55,6 +65,16 @@ const dictionaries = {
       time: '耗时',
       api: 'API',
       credits: '积分',
+      used: '已用',
+      addon: '加购',
+      reset: '重置',
+      updated: '更新',
+      stale: '已过期',
+      source: {
+        official: '官方',
+        snapshot: '快照',
+        local: '本地'
+      },
       tools: '工具',
       idle: '空闲',
       agents: '代理',

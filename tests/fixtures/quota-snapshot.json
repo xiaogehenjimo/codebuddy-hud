@@ -1,0 +1,11 @@
+{
+  "quota": {
+    "remaining": 72,
+    "used": 28,
+    "total": 100,
+    "addon": 10,
+    "plan": "Pro",
+    "resetAt": "2026-06-01T00:00:00Z",
+    "updatedAt": "2999-01-01T00:00:00Z"
+  }
+}

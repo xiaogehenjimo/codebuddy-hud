@@ -69,8 +69,14 @@ test('configure get/set/toggle works with isolated config', () => {
   result = run(['configure', 'set', 'credits.usedCreditsOffset', '100'], { env });
   assert.equal(result.status, 0, result.stderr);
 
+  result = run(['configure', 'set', 'credits.snapshotPath', '/tmp/quota.json'], { env });
+  assert.equal(result.status, 0, result.stderr);
+
   result = run(['configure', 'get', 'credits.totalCredits'], { env });
   assert.equal(result.stdout.trim(), '500');
+
+  result = run(['configure', 'get', 'credits.snapshotPath'], { env });
+  assert.equal(result.stdout.trim(), '"/tmp/quota.json"');
 });
 
 test('setup and uninstall preserve previous statusLine', () => {

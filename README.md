@@ -131,9 +131,31 @@ Formula when official fields are not available:
 remaining = totalCredits - usedCreditsOffset - localTranscriptCredits
 ```
 
-CodeBuddy HUD will prefer official credit/billing fields from the statusLine JSON if CodeBuddy exposes them in the future, including common shapes such as `credits.remaining_credits`, `credits.total_credits`, `billing.remainingCredits`, `billing.totalCredits`, `plan.*`, or `quota.*`. If those fields are missing, it falls back to the local transcript estimate.
+CodeBuddy HUD will prefer official credit/billing fields from the statusLine JSON if CodeBuddy exposes them in the future, including common shapes such as `credits.remaining_credits`, `credits.total_credits`, `billing.remainingCredits`, `billing.totalCredits`, `plan.*`, or `quota.*`.
 
-The local estimate is not an official account balance and may miss usage from other machines, projects, or cleaned transcripts.
+If official fields are missing, HUD can read an explicit local quota snapshot file:
+
+```bash
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.snapshotPath ~/.codebuddy/quota.json
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.maxStalenessMs 3600000
+```
+
+Snapshot example:
+
+```json
+{
+  "quota": {
+    "remaining": 75,
+    "used": 25,
+    "total": 100,
+    "plan": "Pro",
+    "resetAt": "2026-06-01T00:00:00Z",
+    "updatedAt": "2026-05-10T06:00:00Z"
+  }
+}
+```
+
+If both official fields and snapshot are missing, it falls back to the local transcript estimate. The local estimate is not an official account balance and may miss usage from other machines, projects, or cleaned transcripts. HUD never reads credentials or calls undocumented APIs during `status` rendering.
 
 Important display flags:
 

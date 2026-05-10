@@ -82,30 +82,27 @@ test('hides credit estimate when disabled or total is zero', () => {
 });
 
 test('reads official snake_case credit fields before local estimate', () => {
-  assert.deepEqual(creditEstimate({ credits: { remaining_credits: 350, total_credits: 500 } }, { credits: { enabled: true, totalCredits: 999 } }, { creditTotal: 1 }), {
-    remaining: 350,
-    total: 500,
-    used: 150,
-    source: 'official'
-  });
+  const quota = creditEstimate({ credits: { remaining_credits: 350, total_credits: 500 } }, { credits: { enabled: true, totalCredits: 999 } }, { creditTotal: 1 });
+  assert.equal(quota.remaining, 350);
+  assert.equal(quota.total, 500);
+  assert.equal(quota.used, 150);
+  assert.equal(quota.source, 'official');
 });
 
 test('reads official camelCase billing fields', () => {
-  assert.deepEqual(officialCreditEstimate({ billing: { remainingCredits: 120, totalCredits: 200 } }), {
-    remaining: 120,
-    total: 200,
-    used: 80,
-    source: 'official'
-  });
+  const quota = officialCreditEstimate({ billing: { remainingCredits: 120, totalCredits: 200 } });
+  assert.equal(quota.remaining, 120);
+  assert.equal(quota.total, 200);
+  assert.equal(quota.used, 80);
+  assert.equal(quota.source, 'official');
 });
 
 test('computes official remaining from used and total fields', () => {
-  assert.deepEqual(officialCreditEstimate({ quota: { usedCredits: 75, totalCredits: 100 } }), {
-    remaining: 25,
-    total: 100,
-    used: 75,
-    source: 'official'
-  });
+  const quota = officialCreditEstimate({ quota: { usedCredits: 75, totalCredits: 100 } });
+  assert.equal(quota.remaining, 25);
+  assert.equal(quota.total, 100);
+  assert.equal(quota.used, 75);
+  assert.equal(quota.source, 'official');
 });
 
 test('falls back to local estimate when official total is missing', () => {
@@ -127,7 +124,7 @@ test('renders official credits even when local credits are disabled', () => {
     billing: { remainingCredits: 88, totalCredits: 100 }
   }, { ...defaultConfig, language: 'en', colors: { enabled: false }, credits: { enabled: false, totalCredits: 0 } }, { toolCounts: {}, agentCount: 0, tasks: { total: 0, completed: 0 } });
 
-  assert.match(output, /credits 88\/100/);
+  assert.match(output, /credits .*88\/100/);
 });
 
 test('renders estimated credits in English and clamps remaining at zero', () => {
@@ -145,7 +142,7 @@ test('renders estimated credits in English and clamps remaining at zero', () => 
     credits: { enabled: true, totalCredits: 100, usedCreditsOffset: 80 }
   }, { creditTotal: 50, toolCounts: {}, agentCount: 0, tasks: { total: 0, completed: 0 } });
 
-  assert.match(output, /credits 0\/100/);
+  assert.match(output, /credits .*0\/100/);
 });
 
 test('renders estimated credits in Chinese', () => {
@@ -163,7 +160,7 @@ test('renders estimated credits in Chinese', () => {
     credits: { enabled: true, totalCredits: 500, usedCreditsOffset: 100 }
   }, { creditTotal: 86.5, toolCounts: {}, agentCount: 0, tasks: { total: 0, completed: 0 } });
 
-  assert.match(output, /积分 313\.5\/500/);
+  assert.match(output, /积分 .*313\.5\/500/);
 });
 
 test('formats durations compactly', () => {

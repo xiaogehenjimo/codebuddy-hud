@@ -1,6 +1,7 @@
 const path = require('path');
 const { getGitInfo } = require('./git');
 const { createTranslator } = require('./i18n');
+const { extractOfficialQuota, resolveQuota } = require('./quota');
 
 const ANSI = {
   reset: '\x1b[0m',
@@ -194,79 +195,63 @@ function stat(config, key, value, hue = 'cyan') {
   return `${color(config, hue, key)} ${value}`;
 }
 
-function getPath(object, pathParts) {
-  return pathParts.reduce((value, key) => {
-    if (!value || typeof value !== 'object') return undefined;
-    return value[key];
-  }, object);
-}
-
-function firstPathNumber(object, paths) {
-  for (const pathParts of paths) {
-    const value = num(getPath(object, pathParts));
-    if (value !== null) return value;
-  }
-  return null;
-}
-
-const OFFICIAL_REMAINING_PATHS = [
-  ['credits', 'remaining_credits'], ['credits', 'remainingCredits'], ['credits', 'remaining'],
-  ['billing', 'remaining_credits'], ['billing', 'remainingCredits'], ['billing', 'balance_credits'], ['billing', 'balanceCredits'],
-  ['plan', 'remaining_credits'], ['plan', 'remainingCredits'],
-  ['quota', 'remaining_credits'], ['quota', 'remainingCredits'],
-  ['remaining_credits'], ['remainingCredits']
-];
-
-const OFFICIAL_TOTAL_PATHS = [
-  ['credits', 'total_credits'], ['credits', 'totalCredits'], ['credits', 'total'],
-  ['billing', 'total_credits'], ['billing', 'totalCredits'], ['billing', 'total'],
-  ['plan', 'total_credits'], ['plan', 'totalCredits'], ['plan', 'total'],
-  ['quota', 'total_credits'], ['quota', 'totalCredits'], ['quota', 'total'],
-  ['total_credits'], ['totalCredits']
-];
-
-const OFFICIAL_USED_PATHS = [
-  ['credits', 'used_credits'], ['credits', 'usedCredits'], ['credits', 'used'],
-  ['billing', 'used_credits'], ['billing', 'usedCredits'], ['billing', 'used'],
-  ['plan', 'used_credits'], ['plan', 'usedCredits'], ['plan', 'used'],
-  ['quota', 'used_credits'], ['quota', 'usedCredits'], ['quota', 'used'],
-  ['used_credits'], ['usedCredits']
-];
-
 function officialCreditEstimate(status) {
-  const total = firstPathNumber(status, OFFICIAL_TOTAL_PATHS);
-  if (total === null || total <= 0) return null;
-
-  const remainingValue = firstPathNumber(status, OFFICIAL_REMAINING_PATHS);
-  if (remainingValue !== null) {
-    const remaining = Math.max(0, remainingValue);
-    return { remaining, total, used: Math.max(0, total - remaining), source: 'official' };
-  }
-
-  const usedValue = firstPathNumber(status, OFFICIAL_USED_PATHS);
-  if (usedValue !== null) {
-    const used = Math.max(0, usedValue);
-    return { remaining: Math.max(0, total - used), total, used, source: 'official' };
-  }
-
-  return null;
+  return extractOfficialQuota(status);
 }
 
 function creditEstimate(status, config, transcriptSummary) {
-  const official = officialCreditEstimate(status || {});
-  if (official) return official;
+  return resolveQuota(status, config, transcriptSummary);
+}
 
+function quotaColor(config, quota) {
   const credits = config.credits || {};
-  const enabled = Boolean(credits.enabled || (config.display && config.display.showCredits));
-  const total = Math.max(0, num(credits.totalCredits) || 0);
-  if (!enabled || total <= 0) return null;
+  const pct = quota && quota.total > 0 ? (quota.remaining / quota.total) * 100 : 0;
+  if (pct <= (num(credits.dangerRemainingPercent) ?? 10)) return 'brightRed';
+  if (pct <= (num(credits.warningRemainingPercent) ?? 25)) return 'brightYellow';
+  return 'brightBlue';
+}
 
-  const offset = num(credits.usedCreditsOffset) || 0;
-  const transcriptUsed = num(transcriptSummary && transcriptSummary.creditTotal) || 0;
-  const used = Math.max(0, transcriptUsed + offset);
-  const remaining = Math.max(0, total - used);
+function formatDate(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return `${date.getMonth() + 1}/${date.getDate()}`;
+}
 
-  return { remaining, total, used, source: 'local' };
+function formatAge(ms) {
+  const n = num(ms);
+  if (n === null) return '';
+  const seconds = Math.floor(n / 1000);
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 48) return `${hours}h`;
+  return `${Math.floor(hours / 24)}d`;
+}
+
+function quotaSegment(config, t, quota) {
+  if (!quota) return null;
+  const creditsConfig = config.credits || {};
+  const hue = quotaColor(config, quota);
+  const pct = quota.total > 0 ? (quota.remaining / quota.total) * 100 : 0;
+  const parts = [];
+
+  if (creditsConfig.showBar !== false) {
+    parts.push(progressBar(config, pct, creditsConfig.barWidth || 6, hue));
+  }
+
+  parts.push(`${trim(quota.remaining)}/${trim(quota.total)}`);
+  parts.push(`${t('hud.used')} ${trim(quota.used)}`);
+
+  if (quota.addon !== undefined) parts.push(`${t('hud.addon')} ${trim(quota.addon)}`);
+  if (quota.plan) parts.push(String(quota.plan));
+  if (creditsConfig.showReset !== false && quota.resetAt) parts.push(`${t('hud.reset')} ${formatDate(quota.resetAt)}`);
+  if (creditsConfig.showSource !== false && quota.source) parts.push(t(`hud.source.${quota.source}`));
+  if (creditsConfig.showStaleness !== false && quota.stale) parts.push(t('hud.stale'));
+  else if (creditsConfig.showStaleness !== false && quota.source === 'snapshot' && quota.ageMs !== undefined) parts.push(`${t('hud.updated')} ${formatAge(quota.ageMs)}`);
+
+  return stat(config, t('hud.credits'), parts.join(' '), hue);
 }
 
 function render(status, config, transcriptSummary = {}) {
@@ -323,7 +308,7 @@ function render(status, config, transcriptSummary = {}) {
       statParts.push(stat(safeConfig, '$', Number(cost.total_cost_usd).toFixed(4), 'brightYellow'));
     }
     if (credits) {
-      statParts.push(stat(safeConfig, t('hud.credits'), `${trim(credits.remaining)}/${trim(credits.total)}`, 'brightBlue'));
+      statParts.push(quotaSegment(safeConfig, t, credits));
     }
     parts.push(`${label(safeConfig, t('hud.tok'), 'brightBlue')} ${joinParts(safeConfig, statParts)}`);
   }
@@ -351,4 +336,4 @@ function render(status, config, transcriptSummary = {}) {
   return parts.join('\n');
 }
 
-module.exports = { render, contextStats, creditEstimate, officialCreditEstimate, formatTokens, formatDuration };
+module.exports = { render, contextStats, creditEstimate, officialCreditEstimate, quotaSegment, formatTokens, formatDuration };

@@ -26,7 +26,17 @@ const defaultConfig = {
   credits: {
     enabled: false,
     totalCredits: 0,
-    usedCreditsOffset: 0
+    usedCreditsOffset: 0,
+    snapshotPath: '',
+    refreshCommand: '',
+    refreshIntervalMs: 0,
+    maxStalenessMs: 3600000,
+    warningRemainingPercent: 25,
+    dangerRemainingPercent: 10,
+    showBar: true,
+    showSource: true,
+    showReset: true,
+    showStaleness: true
   },
   display: {
     showModel: true,

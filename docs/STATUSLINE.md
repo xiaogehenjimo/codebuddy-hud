@@ -40,6 +40,19 @@ context_window.current_usage.cache_read_input_tokens
 context_window.used_percentage
 context_window.remaining_percentage
 exceeds_200k_tokens
+
+# Optional future official quota fields, if CodeBuddy provides them:
+credits.remaining_credits
+credits.total_credits
+credits.used_credits
+billing.remainingCredits
+billing.totalCredits
+billing.usedCredits
+billing.balanceCredits
+plan.remainingCredits
+plan.totalCredits
+quota.remainingCredits
+quota.totalCredits
 ```
 
 ## Transcript parsing
@@ -49,6 +62,16 @@ When `transcript_path` exists, CodeBuddy HUD parses JSONL events for:
 - `function_call.name` tool counts
 - `Agent` call counts
 - `TaskCreate` / `TaskUpdate` progress
-- `providerData.rawUsage.credit` when `display.showCredits` is enabled
+- `providerData.rawUsage.credit` when local credit estimation is enabled
 
 Parsing failures do not block HUD rendering.
+
+## Quota source priority
+
+CodeBuddy HUD resolves quota data in this order:
+
+1. Official quota fields in the statusLine JSON, if present.
+2. A user-configured local snapshot file via `credits.snapshotPath`.
+3. Local transcript credit estimates.
+
+The status renderer does not execute network requests or read credentials.
