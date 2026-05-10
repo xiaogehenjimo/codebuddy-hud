@@ -1,6 +1,7 @@
 # CodeBuddy HUD
 
 [![Node.js >=18](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org/)
+[![npm version](https://img.shields.io/npm/v/codebuddy-hud)](https://www.npmjs.com/package/codebuddy-hud)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 [![StatusLine](https://img.shields.io/badge/CodeBuddy-statusLine-purple)](https://github.com/xiaogehenjimo/codebuddy-hud)
 
@@ -38,15 +39,17 @@ CodeBuddy · GPT-5.5 · live-iOS · git release/3.43.0 *
 
 ## 快速部署
 
-推荐安装到 CodeBuddy 插件目录：
+CodeBuddy HUD 已发布到 npm：
+
+```bash
+npm install -g codebuddy-hud
+codebuddy-hud setup
+```
+
+也可以从 GitHub 安装到 CodeBuddy 插件目录：
 
 ```bash
 git clone https://github.com/xiaogehenjimo/codebuddy-hud.git ~/.codebuddy/plugins/codebuddy-hud
-```
-
-启用 HUD：
-
-```bash
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js setup
 ```
 
@@ -63,26 +66,6 @@ node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js setup
 
 同时会把旧的 `statusLine` 保存到 `.meta.json`，方便后续回滚。
 
-## 通过 npm 安装
-
-如果已发布到 npm，也可以使用：
-
-```bash
-npm install -g codebuddy-hud
-```
-
-然后运行：
-
-```bash
-codebuddy-hud setup
-```
-
-如果你不想全局安装，也可以在仓库目录中直接使用 Node：
-
-```bash
-node bin/codebuddy-hud.js setup
-```
-
 ## 常用命令
 
 ```bash
@@ -94,7 +77,7 @@ codebuddy-hud config-path  # 输出当前配置路径
 codebuddy-hud configure    # 管理 HUD 配置
 ```
 
-如果未全局安装：
+如果你是从 GitHub 安装，而不是通过 npm 全局安装，可以直接调用脚本：
 
 ```bash
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js status

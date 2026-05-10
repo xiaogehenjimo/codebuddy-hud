@@ -1,6 +1,7 @@
 # CodeBuddy HUD
 
 [![Node.js >=18](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org/)
+[![npm version](https://img.shields.io/npm/v/codebuddy-hud)](https://www.npmjs.com/package/codebuddy-hud)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 [![StatusLine](https://img.shields.io/badge/CodeBuddy-statusLine-purple)](https://github.com/xiaogehenjimo/codebuddy-hud)
 
@@ -38,15 +39,17 @@ tok in 715.9K · out 22.9K · Changes +168 -1
 
 ## Quick install
 
-Clone the repository:
+CodeBuddy HUD is published on npm:
+
+```bash
+npm install -g codebuddy-hud
+codebuddy-hud setup
+```
+
+You can also install from GitHub:
 
 ```bash
 git clone https://github.com/xiaogehenjimo/codebuddy-hud.git ~/.codebuddy/plugins/codebuddy-hud
-```
-
-Enable it in CodeBuddy:
-
-```bash
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js setup
 ```
 
@@ -74,7 +77,7 @@ codebuddy-hud config-path  # print active config path
 codebuddy-hud configure    # manage HUD configuration
 ```
 
-If the package is not linked globally, call the script directly:
+If you installed from GitHub instead of npm, call the script directly:
 
 ```bash
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js status
