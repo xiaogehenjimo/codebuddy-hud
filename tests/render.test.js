@@ -1,12 +1,39 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { render, contextStats, creditEstimate, officialCreditEstimate, formatTokens, formatDuration } = require('../src/render');
+const { render, contextStats, creditEstimate, officialCreditEstimate, formatTokens, formatDuration, pctColor } = require('../src/render');
 const { defaultConfig } = require('../src/config');
 
 test('formats token units with uppercase K and M', () => {
   assert.equal(formatTokens(91700), '91.7K');
   assert.equal(formatTokens(1000000), '1M');
   assert.equal(formatTokens(5800000), '5.8M');
+});
+
+test('maps context usage to progressive risk colors', () => {
+  assert.equal(pctColor({}, 29.9), '#22C55E');
+  assert.equal(pctColor({}, 30), '#A3E635');
+  assert.equal(pctColor({}, 45), '#EAB308');
+  assert.equal(pctColor({}, 60), '#F59E0B');
+  assert.equal(pctColor({}, 70), '#F97316');
+  assert.equal(pctColor({}, 80), '#F87171');
+  assert.equal(pctColor({}, 88), '#EF4444');
+  assert.deepEqual(pctColor({}, 95), ['bold', '#991B1B']);
+});
+
+test('renders context risk color as truecolor ANSI', () => {
+  const output = render({
+    cwd: process.cwd(),
+    model: { display_name: 'GPT-5.5' },
+    workspace: { project_dir: process.cwd(), current_dir: process.cwd() },
+    cost: {},
+    context_window: {
+      context_window_size: 1000000,
+      used_percentage: 95,
+      current_usage: { input_tokens: 950000, output_tokens: 0 }
+    }
+  }, { ...defaultConfig, colors: { enabled: true }, display: { ...defaultConfig.display, showGit: false } }, {});
+
+  assert.match(output, /\x1b\[38;2;153;27;27m/);
 });
 
 test('computes context from current usage first', () => {

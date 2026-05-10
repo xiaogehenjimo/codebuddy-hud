@@ -1,6 +1,6 @@
 {
   "name": "codebuddy-hud",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A multi-line terminal HUD for CodeBuddy Code statusLine.",
   "entry": "bin/codebuddy-hud.js",
   "commands": [

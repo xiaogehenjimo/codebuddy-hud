@@ -23,10 +23,20 @@ const ANSI = {
   white: '\x1b[97m'
 };
 
+function hexColor(value) {
+  const match = /^#?([0-9a-f]{6})$/i.exec(String(value || ''));
+  if (!match) return '';
+  const hex = match[1];
+  const red = parseInt(hex.slice(0, 2), 16);
+  const green = parseInt(hex.slice(2, 4), 16);
+  const blue = parseInt(hex.slice(4, 6), 16);
+  return `\x1b[38;2;${red};${green};${blue}m`;
+}
+
 function color(config, name, text) {
   if (!config.colors || config.colors.enabled === false) return text;
-  const names = Array.isArray(name) ? name : [name];
-  const prefix = names.map((part) => ANSI[part] || '').join('');
+  const names = Array.isArray(name) ? name.flat(Infinity) : [name];
+  const prefix = names.map((part) => ANSI[part] || hexColor(part)).join('');
   return `${prefix}${text}${ANSI.reset}`;
 }
 
@@ -160,10 +170,15 @@ function contextStats(status) {
 }
 
 function pctColor(config, pct) {
-  const thresholds = config.thresholds || {};
-  if (pct >= (thresholds.contextDanger || 90)) return 'brightRed';
-  if (pct >= (thresholds.contextWarning || 70)) return 'brightYellow';
-  return 'brightGreen';
+  const value = num(pct) || 0;
+  if (value >= 95) return ['bold', '#991B1B'];
+  if (value >= 88) return '#EF4444';
+  if (value >= 80) return '#F87171';
+  if (value >= 70) return '#F97316';
+  if (value >= 60) return '#F59E0B';
+  if (value >= 45) return '#EAB308';
+  if (value >= 30) return '#A3E635';
+  return '#22C55E';
 }
 
 function formatGit(git, t) {
@@ -297,4 +312,4 @@ function render(status, config, transcriptSummary = {}) {
   return visibleParts.join('\n');
 }
 
-module.exports = { render, contextStats, creditEstimate, officialCreditEstimate, quotaSegment, formatTokens, formatDuration };
+module.exports = { render, contextStats, creditEstimate, officialCreditEstimate, quotaSegment, formatTokens, formatDuration, pctColor };
