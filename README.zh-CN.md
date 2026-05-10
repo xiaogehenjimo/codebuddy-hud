@@ -108,6 +108,8 @@ node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js status
 
 首次运行会在插件目录生成 `config.json`。仓库内提供干净模板 `config.example.json`。
 
+CodeBuddy statusLine 的可见行数主要受 CodeBuddy UI 约束，不是 Ghostty 或 shell 决定。如果你的 CodeBuddy 终端只显示一两行，可以把 `maxLines` 调低，并把最重要的信息放在前面。插件默认输出 4 行：
+
 查看配置：
 
 ```bash
@@ -123,6 +125,7 @@ node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure get displ
 修改配置：
 
 ```bash
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set maxLines 4
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set barWidth 20
 ```
 

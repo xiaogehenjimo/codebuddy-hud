@@ -9,6 +9,7 @@ node bin/codebuddy-hud.js configure list
 node bin/codebuddy-hud.js configure get display.showCredits
 node bin/codebuddy-hud.js configure set language en
 node bin/codebuddy-hud.js configure set language zh
+node bin/codebuddy-hud.js configure set maxLines 4
 node bin/codebuddy-hud.js configure set credits.enabled true
 node bin/codebuddy-hud.js configure set credits.totalCredits 500
 node bin/codebuddy-hud.js configure set credits.usedCreditsOffset 100

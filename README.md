@@ -88,9 +88,12 @@ node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js status
 
 The first run creates `config.json` next to the plugin. A clean example is tracked as `config.example.json`.
 
+CodeBuddy statusLine rendering may be constrained by the CodeBuddy UI, not by Ghostty or the shell. If your CodeBuddy terminal only shows one or two lines, set `maxLines` lower and keep the most important segments near the top. The plugin defaults to 4 output lines:
+
 ```bash
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure list
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure get display.showCredits
+node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set maxLines 4
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set language en
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set language zh
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.enabled true

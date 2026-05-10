@@ -167,6 +167,20 @@ test('renders estimated credits in Chinese', () => {
   assert.equal(output.split('\n')[3].includes('积分'), true);
 });
 
+test('limits rendered output to configured maxLines', () => {
+  const output = render({
+    cwd: process.cwd(),
+    model: { display_name: 'GPT-5.5' },
+    workspace: { project_dir: process.cwd(), current_dir: process.cwd() },
+    cost: {},
+    context_window: {},
+    billing: { remainingCredits: 88, totalCredits: 100 }
+  }, { ...defaultConfig, language: 'zh', colors: { enabled: false }, maxLines: 3 }, { toolCounts: { Read: 1 }, agentCount: 1, tasks: { total: 1, completed: 1 } });
+
+  assert.equal(output.split('\n').length, 3);
+  assert.match(output, /词元/);
+});
+
 test('formats durations compactly', () => {
   assert.equal(formatDuration(0), '0s');
   assert.equal(formatDuration(61000), '1m1s');

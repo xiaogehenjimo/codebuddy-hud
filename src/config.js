@@ -18,6 +18,7 @@ const defaultConfig = {
   barWidth: 16,
   taskBarWidth: 8,
   maxWidth: 96,
+  maxLines: 4,
   transcript: {
     enabled: true,
     maxInitialReadBytes: 262144,

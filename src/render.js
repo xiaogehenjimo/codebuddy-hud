@@ -334,7 +334,9 @@ function render(status, config, transcriptSummary = {}) {
     parts.push(`${label(safeConfig, t('hud.act'), 'brightGreen')} ${joinParts(safeConfig, activityParts)}`);
   }
 
-  return parts.join('\n');
+  const maxLines = num(safeConfig.maxLines);
+  const visibleParts = maxLines && maxLines > 0 ? parts.slice(0, Math.floor(maxLines)) : parts;
+  return visibleParts.join('\n');
 }
 
 module.exports = { render, contextStats, creditEstimate, officialCreditEstimate, quotaSegment, formatTokens, formatDuration };
