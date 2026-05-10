@@ -284,7 +284,6 @@ function render(status, config, transcriptSummary = {}) {
     const contextLine = joinParts(safeConfig, [
       `${label(safeConfig, t('hud.ctx'), 'brightMagenta')} ${contextBar} ${color(safeConfig, ['bold', ctxColor], formatPercent(ctx.pct))}`,
       stat(safeConfig, t('hud.tok'), tokens, 'cyan'),
-      safeStatus.exceeds_200k_tokens ? color(safeConfig, ['bold', 'brightYellow'], '>200k') : null,
       display.showCache && ctx.cache ? stat(safeConfig, t('hud.cache'), formatTokens(ctx.cache), 'blue') : null
     ]);
     parts.push(contextLine);
@@ -297,9 +296,8 @@ function render(status, config, transcriptSummary = {}) {
       statParts.push(stat(safeConfig, t('hud.in'), formatTokens(ctx.totalInput), 'green'));
       statParts.push(stat(safeConfig, t('hud.out'), formatTokens(ctx.totalOutput), 'green'));
     }
-    if (display.showDuration) {
-      statParts.push(stat(safeConfig, t('hud.time'), formatDuration(cost.total_duration_ms), 'yellow'));
-      statParts.push(stat(safeConfig, t('hud.api'), formatDuration(cost.total_api_duration_ms), 'yellow'));
+    if (credits) {
+      statParts.push(quotaSegment(safeConfig, t, credits));
     }
     if (display.showLinesChanged) {
       statParts.push(stat(safeConfig, 'Δ', `+${num(cost.total_lines_added) || 0} -${num(cost.total_lines_removed) || 0}`, 'magenta'));
@@ -308,10 +306,6 @@ function render(status, config, transcriptSummary = {}) {
       statParts.push(stat(safeConfig, '$', Number(cost.total_cost_usd).toFixed(4), 'brightYellow'));
     }
     parts.push(`${label(safeConfig, t('hud.tok'), 'brightBlue')} ${joinParts(safeConfig, statParts)}`);
-  }
-
-  if (credits) {
-    parts.push(quotaSegment(safeConfig, t, credits));
   }
 
   if (display.showTools || display.showAgents || display.showTasks) {

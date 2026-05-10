@@ -127,7 +127,7 @@ test('renders official credits even when local credits are disabled', () => {
   }, { ...defaultConfig, language: 'en', colors: { enabled: false }, credits: { enabled: false, totalCredits: 0 } }, { toolCounts: {}, agentCount: 0, tasks: { total: 0, completed: 0 } });
 
   assert.match(output, /credits .*88\/100/);
-  assert.equal(output.split('\n')[3].includes('credits'), true);
+  assert.equal(output.split('\n')[2].includes('credits'), true);
 });
 
 test('renders estimated credits in English and clamps remaining at zero', () => {
@@ -164,7 +164,7 @@ test('renders estimated credits in Chinese', () => {
   }, { creditTotal: 86.5, toolCounts: {}, agentCount: 0, tasks: { total: 0, completed: 0 } });
 
   assert.match(output, /积分 .*313\.5\/500/);
-  assert.equal(output.split('\n')[3].includes('积分'), true);
+  assert.equal(output.split('\n')[2].includes('积分'), true);
 });
 
 test('limits rendered output to configured maxLines', () => {
