@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { render, contextStats, creditEstimate, formatTokens, formatDuration } = require('../src/render');
+const { render, contextStats, creditEstimate, officialCreditEstimate, formatTokens, formatDuration } = require('../src/render');
 const { defaultConfig } = require('../src/config');
 
 test('formats token units with uppercase K and M', () => {
@@ -68,16 +68,66 @@ test('renders Chinese HUD labels when language is zh', () => {
 });
 
 test('estimates remaining credits from transcript total and offset', () => {
-  assert.deepEqual(creditEstimate({ credits: { enabled: true, totalCredits: 500, usedCreditsOffset: 100 } }, { creditTotal: 86.5 }), {
+  assert.deepEqual(creditEstimate({}, { credits: { enabled: true, totalCredits: 500, usedCreditsOffset: 100 } }, { creditTotal: 86.5 }), {
     remaining: 313.5,
     total: 500,
-    used: 186.5
+    used: 186.5,
+    source: 'local'
   });
 });
 
 test('hides credit estimate when disabled or total is zero', () => {
-  assert.equal(creditEstimate({ credits: { enabled: false, totalCredits: 500 } }, { creditTotal: 1 }), null);
-  assert.equal(creditEstimate({ credits: { enabled: true, totalCredits: 0 } }, { creditTotal: 1 }), null);
+  assert.equal(creditEstimate({}, { credits: { enabled: false, totalCredits: 500 } }, { creditTotal: 1 }), null);
+  assert.equal(creditEstimate({}, { credits: { enabled: true, totalCredits: 0 } }, { creditTotal: 1 }), null);
+});
+
+test('reads official snake_case credit fields before local estimate', () => {
+  assert.deepEqual(creditEstimate({ credits: { remaining_credits: 350, total_credits: 500 } }, { credits: { enabled: true, totalCredits: 999 } }, { creditTotal: 1 }), {
+    remaining: 350,
+    total: 500,
+    used: 150,
+    source: 'official'
+  });
+});
+
+test('reads official camelCase billing fields', () => {
+  assert.deepEqual(officialCreditEstimate({ billing: { remainingCredits: 120, totalCredits: 200 } }), {
+    remaining: 120,
+    total: 200,
+    used: 80,
+    source: 'official'
+  });
+});
+
+test('computes official remaining from used and total fields', () => {
+  assert.deepEqual(officialCreditEstimate({ quota: { usedCredits: 75, totalCredits: 100 } }), {
+    remaining: 25,
+    total: 100,
+    used: 75,
+    source: 'official'
+  });
+});
+
+test('falls back to local estimate when official total is missing', () => {
+  assert.deepEqual(creditEstimate({ credits: { remaining_credits: 350 } }, { credits: { enabled: true, totalCredits: 500, usedCreditsOffset: 100 } }, { creditTotal: 50 }), {
+    remaining: 350,
+    total: 500,
+    used: 150,
+    source: 'local'
+  });
+});
+
+test('renders official credits even when local credits are disabled', () => {
+  const output = render({
+    cwd: process.cwd(),
+    model: { display_name: 'GPT-5.5' },
+    workspace: { project_dir: process.cwd(), current_dir: process.cwd() },
+    cost: {},
+    context_window: {},
+    billing: { remainingCredits: 88, totalCredits: 100 }
+  }, { ...defaultConfig, language: 'en', colors: { enabled: false }, credits: { enabled: false, totalCredits: 0 } }, { toolCounts: {}, agentCount: 0, tasks: { total: 0, completed: 0 } });
+
+  assert.match(output, /credits 88\/100/);
 });
 
 test('renders estimated credits in English and clamps remaining at zero', () => {

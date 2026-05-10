@@ -125,13 +125,15 @@ node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credi
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.usedCreditsOffset 0
 ```
 
-Formula:
+Formula when official fields are not available:
 
 ```text
 remaining = totalCredits - usedCreditsOffset - localTranscriptCredits
 ```
 
-This is a local estimate from transcript credit usage. It is not an official account balance and may miss usage from other machines, projects, or cleaned transcripts.
+CodeBuddy HUD will prefer official credit/billing fields from the statusLine JSON if CodeBuddy exposes them in the future, including common shapes such as `credits.remaining_credits`, `credits.total_credits`, `billing.remainingCredits`, `billing.totalCredits`, `plan.*`, or `quota.*`. If those fields are missing, it falls back to the local transcript estimate.
+
+The local estimate is not an official account balance and may miss usage from other machines, projects, or cleaned transcripts.
 
 Important display flags:
 

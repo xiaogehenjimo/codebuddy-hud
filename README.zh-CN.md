@@ -141,13 +141,15 @@ node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credi
 node ~/.codebuddy/plugins/codebuddy-hud/bin/codebuddy-hud.js configure set credits.usedCreditsOffset 0
 ```
 
-计算方式：
+没有官方字段时的计算方式：
 
 ```text
 剩余积分 = 总积分 - 历史已用偏移 - 本地 transcript 统计积分
 ```
 
-注意：这是基于本机 transcript 的本地估算，不是官方账号余额。其它机器、其它项目或已清理 transcript 的消耗可能无法统计。
+如果未来 CodeBuddy 在 statusLine JSON 中提供官方积分/账单字段，HUD 会优先读取，例如 `credits.remaining_credits`、`credits.total_credits`、`billing.remainingCredits`、`billing.totalCredits`、`plan.*` 或 `quota.*`。如果官方字段不存在，则回退到本地 transcript 估算。
+
+注意：本地估算不是官方账号余额。其它机器、其它项目或已清理 transcript 的消耗可能无法统计。
 ```
 
 `language` 只影响 HUD 标签和命令行提示，不会翻译模型名、分支名、工具名或 token 单位。

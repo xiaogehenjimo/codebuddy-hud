@@ -194,7 +194,68 @@ function stat(config, key, value, hue = 'cyan') {
   return `${color(config, hue, key)} ${value}`;
 }
 
-function creditEstimate(config, transcriptSummary) {
+function getPath(object, pathParts) {
+  return pathParts.reduce((value, key) => {
+    if (!value || typeof value !== 'object') return undefined;
+    return value[key];
+  }, object);
+}
+
+function firstPathNumber(object, paths) {
+  for (const pathParts of paths) {
+    const value = num(getPath(object, pathParts));
+    if (value !== null) return value;
+  }
+  return null;
+}
+
+const OFFICIAL_REMAINING_PATHS = [
+  ['credits', 'remaining_credits'], ['credits', 'remainingCredits'], ['credits', 'remaining'],
+  ['billing', 'remaining_credits'], ['billing', 'remainingCredits'], ['billing', 'balance_credits'], ['billing', 'balanceCredits'],
+  ['plan', 'remaining_credits'], ['plan', 'remainingCredits'],
+  ['quota', 'remaining_credits'], ['quota', 'remainingCredits'],
+  ['remaining_credits'], ['remainingCredits']
+];
+
+const OFFICIAL_TOTAL_PATHS = [
+  ['credits', 'total_credits'], ['credits', 'totalCredits'], ['credits', 'total'],
+  ['billing', 'total_credits'], ['billing', 'totalCredits'], ['billing', 'total'],
+  ['plan', 'total_credits'], ['plan', 'totalCredits'], ['plan', 'total'],
+  ['quota', 'total_credits'], ['quota', 'totalCredits'], ['quota', 'total'],
+  ['total_credits'], ['totalCredits']
+];
+
+const OFFICIAL_USED_PATHS = [
+  ['credits', 'used_credits'], ['credits', 'usedCredits'], ['credits', 'used'],
+  ['billing', 'used_credits'], ['billing', 'usedCredits'], ['billing', 'used'],
+  ['plan', 'used_credits'], ['plan', 'usedCredits'], ['plan', 'used'],
+  ['quota', 'used_credits'], ['quota', 'usedCredits'], ['quota', 'used'],
+  ['used_credits'], ['usedCredits']
+];
+
+function officialCreditEstimate(status) {
+  const total = firstPathNumber(status, OFFICIAL_TOTAL_PATHS);
+  if (total === null || total <= 0) return null;
+
+  const remainingValue = firstPathNumber(status, OFFICIAL_REMAINING_PATHS);
+  if (remainingValue !== null) {
+    const remaining = Math.max(0, remainingValue);
+    return { remaining, total, used: Math.max(0, total - remaining), source: 'official' };
+  }
+
+  const usedValue = firstPathNumber(status, OFFICIAL_USED_PATHS);
+  if (usedValue !== null) {
+    const used = Math.max(0, usedValue);
+    return { remaining: Math.max(0, total - used), total, used, source: 'official' };
+  }
+
+  return null;
+}
+
+function creditEstimate(status, config, transcriptSummary) {
+  const official = officialCreditEstimate(status || {});
+  if (official) return official;
+
   const credits = config.credits || {};
   const enabled = Boolean(credits.enabled || (config.display && config.display.showCredits));
   const total = Math.max(0, num(credits.totalCredits) || 0);
@@ -205,7 +266,7 @@ function creditEstimate(config, transcriptSummary) {
   const used = Math.max(0, transcriptUsed + offset);
   const remaining = Math.max(0, total - used);
 
-  return { remaining, total, used };
+  return { remaining, total, used, source: 'local' };
 }
 
 function render(status, config, transcriptSummary = {}) {
@@ -244,7 +305,7 @@ function render(status, config, transcriptSummary = {}) {
     parts.push(contextLine);
   }
 
-  const credits = creditEstimate(safeConfig, transcriptSummary);
+  const credits = creditEstimate(safeStatus, safeConfig, transcriptSummary);
   if (display.showTokens || display.showDuration || display.showLinesChanged || display.showCost || credits) {
     const statParts = [];
     if (display.showTokens) {
@@ -290,4 +351,4 @@ function render(status, config, transcriptSummary = {}) {
   return parts.join('\n');
 }
 
-module.exports = { render, contextStats, creditEstimate, formatTokens, formatDuration };
+module.exports = { render, contextStats, creditEstimate, officialCreditEstimate, formatTokens, formatDuration };
